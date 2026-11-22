@@ -1,17 +1,11 @@
-package Resposteria;
+package dulcebrioche;
 
-import dulcebrioche.ItemCarrito;
-import dulcebrioche.Persona;
-import dulcebrioche.Producto;
-import dulcebrioche.Sesion;
-import dulcebrioche.Usuario;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,8 +66,7 @@ public int insertarPersona(Persona obj)
 
     try
     {
-        PreparedStatement ps =
-                con.prepareStatement(
+        PreparedStatement ps = con.prepareStatement(
 
                 "INSERT INTO personas(" +
                 "Nombre," +

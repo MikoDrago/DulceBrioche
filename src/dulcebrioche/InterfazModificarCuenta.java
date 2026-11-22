@@ -82,7 +82,7 @@ public class InterfazModificarCuenta extends JFrame {
 
         tarjeta.add(headerCompleto, BorderLayout.NORTH);
 
-        // --- FORMULARIO (Acomodado igual que Registro) ---
+        // Formulario
         JPanel form = new JPanel();
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
         form.setOpaque(false);
@@ -113,7 +113,6 @@ public class InterfazModificarCuenta extends JFrame {
         form.add(crearFila(2, campo("Apellido materno (opcional)", txtApellidoM), campo("Número de Teléfono", txtTelefono)));
         form.add(Box.createRigidArea(new Dimension(0, 8)));
 
-        // Fila especial: Calle (ancha) + N° Ext + N° Int
         JPanel filaDireccion = new JPanel(new BorderLayout(15, 0));
         filaDireccion.setOpaque(false);
         filaDireccion.setAlignmentX(Component.LEFT_ALIGNMENT);

@@ -157,6 +157,10 @@ public class InterfazPerfil extends JFrame {
 
         // Botones Eliminar y Editar
         JButton btnEditarDatos = crearBotonEstilizado("Editar Datos", COLOR_BOTON_EDITAR, Color.WHITE, 120, 32);
+        btnEditarDatos.addActionListener(e -> {
+            new InterfazModificarCuenta().setVisible(true);
+            dispose();
+        });
         JButton btnEliminarCuenta = crearBotonEstilizado("Eliminar cuenta", COLOR_BOTON_ELIMINAR, Color.WHITE, 130, 32);
 
         pBotonesDerecha.add(btnEditarDatos);
@@ -181,7 +185,7 @@ public class InterfazPerfil extends JFrame {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
-
+   
         tablaCompletados = new JTable(modeloTabla);
         tablaCompletados.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         tablaCompletados.setRowHeight(28);

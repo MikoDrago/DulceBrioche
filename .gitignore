@@ -5,6 +5,9 @@ nbproject/private/
 build/
 dist/
 
+# Variables de entorno
+.env
+
 # Java
 *.class
 

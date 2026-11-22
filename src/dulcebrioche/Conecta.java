@@ -27,7 +27,10 @@ public class Conecta {
             // URL de conexión: usa ?user=...&password=... en lugar de coma
             String url = "jdbc:mysql://localhost:3306/reposteria?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
             String user = "root";
-            String password = "Foxel123_";
+            String password = System.getenv("DB_PASSWORD");
+            if (password == null || password.isBlank()) {
+                throw new SQLException("La variable de entorno DB_PASSWORD no está definida");
+            }
             
             con = DriverManager.getConnection(url, user, password);
             System.out.println("Conectado a la base de datos en MySQL Server");

@@ -113,6 +113,7 @@ public class InterfazModificarCuenta extends JFrame {
         form.add(crearFila(2, campo("Apellido materno (opcional)", txtApellidoM), campo("Número de Teléfono", txtTelefono)));
         form.add(Box.createRigidArea(new Dimension(0, 8)));
 
+        // Datos de direccion
         JPanel filaDireccion = new JPanel(new BorderLayout(15, 0));
         filaDireccion.setOpaque(false);
         filaDireccion.setAlignmentX(Component.LEFT_ALIGNMENT);

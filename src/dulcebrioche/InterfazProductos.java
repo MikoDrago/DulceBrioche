@@ -215,6 +215,10 @@ public class InterfazProductos extends JFrame {
         if (esAdmin) {
             JButton btnEditar = crearBotonEstilizado("Editar", COLOR_BOTON_EDITAR, Color.WHITE);
             btnEditar.setPreferredSize(new Dimension(70, 30));
+            btnEditar.addActionListener(e -> {
+                new InterfazModificarProduct(p).setVisible(true);
+                dispose();
+            });
             pBotones.add(btnEditar);
 
             JButton btnEliminar = crearBotonEstilizado("Eliminar", COLOR_BOTON_ELIMINAR, Color.WHITE);

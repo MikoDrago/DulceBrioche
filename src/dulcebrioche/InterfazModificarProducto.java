@@ -1,4 +1,4 @@
-package interfazregistro;
+package dulcebrioche;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -7,9 +7,9 @@ import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.nio.file.Files;
 
-public class InterfazModificarProduct extends JFrame {
+public class InterfazModificarProducto extends JFrame {
 
-    private ProductoTemp producto;
+    private Producto producto;
     private JTextField txtNombre, txtPrecio, txtStock, txtDiasAnticipacion;
     private JComboBox<String> cmbCategoria;
     private JTextArea txtDescripcion;
@@ -23,7 +23,7 @@ public class InterfazModificarProduct extends JFrame {
     private final Color COLOR_TEXTO = new Color(61, 43, 40);
     private final Color COLOR_BORDER_INPUT = new Color(230, 218, 210);
 
-    public InterfazModificarProduct(ProductoTemp p) {
+    public InterfazModificarProducto(Producto p) {
         this.producto = p;
 
         setTitle("Dulce Brioche - Modificar Producto [ADMINISTRADOR]");
@@ -86,7 +86,7 @@ public class InterfazModificarProduct extends JFrame {
         colIzquierda.setLayout(new BoxLayout(colIzquierda, BoxLayout.Y_AXIS));
         colIzquierda.setOpaque(false);
 
-        txtNombre = crearCampoTexto(p != null ? p.nombre : "");
+        txtNombre = crearCampoTexto(p != null ? p.NombreProducto : "");
         
         String[] categorias = {"Pasteles de Ocasión", "Galletas & Tartas", "Panadería Fina", "Postres Individuales", "Cupcakes & Muffins"};
         cmbCategoria = new JComboBox<>(categorias);
@@ -94,13 +94,13 @@ public class InterfazModificarProduct extends JFrame {
         cmbCategoria.setBackground(Color.WHITE);
         cmbCategoria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         cmbCategoria.setAlignmentX(Component.LEFT_ALIGNMENT);
-        if (p != null && p.categoria != null) {
-            cmbCategoria.setSelectedItem(p.categoria);
+        if (p != null && p.Categoria != null) {
+            cmbCategoria.setSelectedItem(p.Categoria);
         }
 
-        txtPrecio = crearCampoTexto(p != null ? String.valueOf(p.precio) : "");
-        txtStock = crearCampoTexto(p != null ? String.valueOf(p.stock) : "");
-        txtDiasAnticipacion = crearCampoTexto(p != null ? String.valueOf(p.diasAnticipacion) : "");
+        txtPrecio = crearCampoTexto(p != null ? String.valueOf(p.Precio) : "");
+        txtStock = crearCampoTexto(p != null ? String.valueOf(p.Stock) : "");
+        txtDiasAnticipacion = crearCampoTexto(p != null ? String.valueOf(p.DiasAnticipacion) : "");
 
         agregarCampo(colIzquierda, "Nombre del Producto", txtNombre);
         agregarCampo(colIzquierda, "Categoría", cmbCategoria);
@@ -113,7 +113,7 @@ public class InterfazModificarProduct extends JFrame {
         colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
         colDerecha.setOpaque(false);
 
-        txtDescripcion = new JTextArea(p != null ? p.descripcion : "", 4, 20);
+        txtDescripcion = new JTextArea(p != null ? p.Descripcion : "", 4, 20);
         txtDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtDescripcion.setLineWrap(true);
         txtDescripcion.setWrapStyleWord(true);
@@ -186,7 +186,7 @@ public class InterfazModificarProduct extends JFrame {
         if (producto == null) return;
         try {
             Conecta bd = new Conecta();
-            imagenBytes = bd.obtenerPrimeraImagen(producto.idProducto);
+            imagenBytes = bd.obtenerPrimeraImagen(producto.IdProducto);
             if (imagenBytes != null) {
                 Image img = new ImageIcon(imagenBytes).getImage().getScaledInstance(240, 130, Image.SCALE_SMOOTH);
                 lblImagenPreview.setText("");
@@ -213,16 +213,70 @@ public class InterfazModificarProduct extends JFrame {
         }
     }
 
-    private void guardarCambios() {
+    private void guardarCambios()
+{
+    if(txtNombre.getText().trim().isEmpty()
+            ||
+       txtPrecio.getText().trim().isEmpty())
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Por favor completa los campos obligatorios.");
+
+        return;
+    }
+
+    try
+    {
+        producto.setNombreProducto(txtNombre.getText());
+        producto.setCategoria(cmbCategoria.getSelectedItem().toString());
+        producto.setPrecio(Double.parseDouble(txtPrecio.getText()));
+        producto.setStock(Integer.parseInt(txtStock.getText()));
+        producto.setDiasAnticipacion(Integer.parseInt(txtDiasAnticipacion.getText()));
+        producto.setDescripcion(txtDescripcion.getText());
+
+        Conecta bd = new Conecta();
+
+        boolean actualizado = bd.actualizarProducto(producto,imagenBytes);
+
+        bd.desconectar();
+
+        if(actualizado)
+        {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Producto actualizado correctamente");
+
+            new InterfazProductos(true)
+                    .setVisible(true);
+
+            dispose();
+        }
+    }
+    catch(NumberFormatException ex)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Precio, stock y días deben ser numéricos.");
+    }
+    catch(Exception ex)
+    {
+        ex.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Error al actualizar el producto.");
+    }
+
         if (txtNombre.getText().trim().isEmpty() || txtPrecio.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor completa los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            double precio = Double.parseDouble(txtPrecio.getText().trim());
-            int stock = Integer.parseInt(txtStock.getText().trim());
-            int dias = Integer.parseInt(txtDiasAnticipacion.getText().trim());
+            double Precio = Double.parseDouble(txtPrecio.getText().trim());
+            int Stock = Integer.parseInt(txtStock.getText().trim());
+            int DiasAnticipacion = Integer.parseInt(txtDiasAnticipacion.getText().trim());
 
             JOptionPane.showMessageDialog(this, "¡Producto actualizado correctamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             new InterfazProductos(true).setVisible(true);
@@ -252,9 +306,5 @@ public class InterfazModificarProduct extends JFrame {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(ancho, alto));
         return btn;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new InterfazModificarProduct(null).setVisible(true));
     }
 }

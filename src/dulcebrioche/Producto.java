@@ -20,7 +20,7 @@ public class Producto {
         this.DiasAnticipacion = DiasAnticipacion;
     }
 
-    public int IdProducto() {
+    public int getIdProducto() {
         return IdProducto;
     }
     public void setIdProducto(int IdProducto) {

@@ -6,6 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +33,10 @@ public class Conecta {
             // URL de conexión: usa ?user=...&password=... en lugar de coma
             String url = "jdbc:mysql://localhost:3306/reposteria?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
             String user = "root";
-            String password = System.getenv("DB_PASSWORD");
+            String password = obtenerPassword();
             System.out.println("Usuario: " + user);
-            System.out.println("Password: " + password);
             if (password == null || password.isBlank()) {
-                throw new SQLException("La variable de entorno DB_PASSWORD no está definida");
+                throw new SQLException("DB_PASSWORD no está definida en las variables de entorno ni en el archivo .env");
             }
             
             con = DriverManager.getConnection(url, user, password);
@@ -41,10 +44,47 @@ public class Conecta {
             System.out.println("Ya esta listo");
         } catch (ClassNotFoundException cnfe) {
             System.out.println("Driver JDBC no encontrado: " + cnfe.getMessage());
+        } catch (IOException ioe) {
+            System.out.println("Error al leer el archivo .env: " + ioe.getMessage());
         } catch (SQLException sqle) {
             System.out.println("Error al conectar: " + sqle.getMessage());
         }
     }
+
+    private String obtenerPassword() throws IOException {
+        String password = System.getenv("DB_PASSWORD");
+        if (password != null && !password.isBlank()) {
+            return password;
+        }
+
+        Path archivoEnv = Path.of(".env");
+        if (!Files.isRegularFile(archivoEnv)) {
+            return null;
+        }
+
+        for (String linea : Files.readAllLines(archivoEnv, StandardCharsets.UTF_8)) {
+            String contenido = linea.trim();
+            if (contenido.isEmpty() || contenido.startsWith("#")) {
+                continue;
+            }
+
+            int separador = contenido.indexOf('=');
+            if (separador < 0 || !"DB_PASSWORD".equals(contenido.substring(0, separador).trim())) {
+                continue;
+            }
+
+            password = contenido.substring(separador + 1).trim();
+            if (password.length() >= 2
+                    && ((password.startsWith("\"") && password.endsWith("\""))
+                    || (password.startsWith("'") && password.endsWith("'")))) {
+                password = password.substring(1, password.length() - 1);
+            }
+            return password;
+        }
+
+        return null;
+    }
+
     public Connection getConnection() {
         return con;
     }
@@ -66,7 +106,6 @@ public class Conecta {
     }
     
     //Inser Persona
-    
 public int insertarPersona(Persona obj)
 {
     int idPersona = 0;
@@ -104,7 +143,8 @@ public int insertarPersona(Persona obj)
         ps.setString(10,obj.getEstado());
         ps.setString(11,obj.getCodigoPostal());
 
-        ResultSet rs =                ps.getGeneratedKeys();
+        ps.executeUpdate();
+        ResultSet rs = ps.getGeneratedKeys();
 
         if(rs.next())
         {
@@ -132,13 +172,13 @@ public int insertarPersona(Persona obj)
         "IdPersona,IdRol,NombreUsuario," +
         "CorreoElectronico,Contrasena) VALUES(?,?,?,?,?)");
     
-        ps.setInt(1,obj.getIdUsuario());
-        ps.setInt(2,obj.getIdPersona());
-        ps.setInt(3,obj.getIdRol());
-        ps.setString(4,obj.getUsuario());
-        ps.setString(5,obj.getCorreo());
-        ps.setString(6,obj.getContrasena());
-    
+        ps.setInt(1,obj.getIdPersona());
+        ps.setInt(2,obj.getIdRol());
+        ps.setString(3,obj.getUsuario());
+        ps.setString(4,obj.getCorreo());
+        ps.setString(5,obj.getContrasena());
+
+        ps.executeUpdate();
 
     }
     catch(SQLException e)
@@ -1109,6 +1149,87 @@ public boolean actualizarDatos(
 
     return false;
 }
+public boolean actualizarProducto(
+        Producto p,
+        byte[] imagenNueva)
+{
+    try
+    {
+        PreparedStatement ps = con.prepareStatement(
 
+                "UPDATE productos " +
+                "SET NombreProducto = ?, " +
+                "Categoria = ?, " +
+                "Precio = ?, " +
+                "Stock = ?, " +
+                "DiasAnticipacion = ?, " +
+                "Descripcion = ? " +
+                "WHERE IdProducto = ?"
+
+                );
+
+        ps.setString(1,p.getNombreProducto());
+
+        ps.setString(2,p.getCategoria());
+
+        ps.setDouble(3,p.getPrecio());
+
+        ps.setInt(4,p.getStock());
+
+        ps.setInt(5,p.getDiasAnticipacion());
+
+        ps.setString(6,p.getDescripcion());
+
+        ps.setInt(7,p.getIdProducto());
+
+        ps.executeUpdate();
+
+        // Actualizar imagen si seleccionaron una
+
+        if(imagenNueva != null)
+        {
+            ps =con.prepareStatement(
+
+            "UPDATE imagenesproducto " +
+            "SET Imagen = ? " +
+            "WHERE IdProducto = ?"
+
+            );
+
+            ps.setBytes(1,imagenNueva);
+
+            ps.setInt(2,p.getIdProducto());
+
+            int filas =ps.executeUpdate();
+
+            // Si no había imagen previamente
+
+            if(filas == 0)
+            {
+                ps =con.prepareStatement(
+
+                "INSERT INTO imagenesproducto(" +
+                "IdProducto, Imagen" +
+                ") VALUES(?,?)"
+
+                );
+
+                ps.setInt(1,p.getIdProducto());
+
+                ps.setBytes(2,imagenNueva);
+
+                ps.executeUpdate();
+            }
+        }
+
+        return true;
+    }
+    catch(Exception e)
+    {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 
 }

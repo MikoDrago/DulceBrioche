@@ -1156,7 +1156,6 @@ public boolean actualizarProducto(
     try
     {
         PreparedStatement ps = con.prepareStatement(
-
                 "UPDATE productos " +
                 "SET NombreProducto = ?, " +
                 "Categoria = ?, " +
@@ -1165,27 +1164,18 @@ public boolean actualizarProducto(
                 "DiasAnticipacion = ?, " +
                 "Descripcion = ? " +
                 "WHERE IdProducto = ?"
-
                 );
 
         ps.setString(1,p.getNombreProducto());
-
         ps.setString(2,p.getCategoria());
-
         ps.setDouble(3,p.getPrecio());
-
         ps.setInt(4,p.getStock());
-
         ps.setInt(5,p.getDiasAnticipacion());
-
         ps.setString(6,p.getDescripcion());
-
         ps.setInt(7,p.getIdProducto());
-
         ps.executeUpdate();
 
         // Actualizar imagen si seleccionaron una
-
         if(imagenNueva != null)
         {
             ps =con.prepareStatement(

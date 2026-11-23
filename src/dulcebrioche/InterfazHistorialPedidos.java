@@ -14,7 +14,6 @@ public class InterfazHistorialPedidos extends JFrame {
     private DefaultTableModel modeloTabla;
     private TableRowSorter<DefaultTableModel> sorter;
     private JLabel lblTotal;
-    private JTextField txtFiltroBusqueda;
 
     private final Color COLOR_FONDO_APP = new Color(251, 246, 240);
     private final Color COLOR_TARJETA = new Color(255, 255, 255);

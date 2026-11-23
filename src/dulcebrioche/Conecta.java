@@ -862,7 +862,7 @@ public int insertarPersona(Persona obj)
         return lista;
     }
     
-    public boolean eliminarProducto(Producto obj) {
+    public void eliminarProducto(Producto obj) {
         System.out.println("Eliminando producto: " + obj.getNombreProducto());
         try {
             PreparedStatement ps = con.prepareStatement("DELETE FROM productos WHERE NombreProducto = ?");
@@ -871,13 +871,10 @@ public int insertarPersona(Persona obj)
             int filasEliminadas = ps.executeUpdate();
             System.out.println("Numero de registros eliminados: " + filasEliminadas);
             ps.close();
-
-            return filasEliminadas > 0;
         } catch (SQLException sqle) {
             System.out.println("Error al eliminar producto: " + sqle.getMessage());
             sqle.printStackTrace();
         }
-        return false;
     }
 
     public boolean eliminarCuentaCliente(int idPersona) {
@@ -1156,7 +1153,7 @@ public int insertarPersona(Persona obj)
         {
             throw new RuntimeException("Error al actualizar el producto.",e);
         }
-       // return false;
+       //return false;
     }
 
 }

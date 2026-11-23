@@ -281,10 +281,6 @@ finally
         }
         
         try {
-            double Precio = Double.parseDouble(txtPrecio.getText().trim());
-            int Stock = Integer.parseInt(txtStock.getText().trim());
-            int DiasAnticipacion = Integer.parseInt(txtDiasAnticipacion.getText().trim());
-
             JOptionPane.showMessageDialog(this, "¡Producto actualizado correctamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             new InterfazProductos(true).setVisible(true);
             dispose();

@@ -5,39 +5,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.RenderingHints;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
-
+import javax.swing.*;
+import java.awt.*;
 
 public class InterfazAdminPanel extends JFrame {
 
     private final Color COLOR_FONDO_APP = new Color(251, 246, 240);
     private final Color COLOR_TARJETA = new Color(255, 255, 255);
     private final Color COLOR_TITULO = new Color(140, 45, 67);
-    private final Color COLOR_BOTON_PRIMARIO = new Color(200, 98, 122);
-    private final Color COLOR_TEXTO = new Color(61, 43, 40);
+    //private final Color COLOR_BOTON_PRIMARIO = new Color(200, 98, 122);
+    //private final Color COLOR_TEXTO = new Color(61, 43, 40);
     private final Color COLOR_BORDER_INPUT = new Color(230, 218, 210);
 
     public InterfazAdminPanel() {

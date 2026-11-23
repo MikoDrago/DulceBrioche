@@ -3,34 +3,9 @@ package dulcebrioche;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.*;
+import javax.swing.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.RowFilter;
-import javax.swing.SwingConstants;
 
 public class InterfazHistorialPedidos extends JFrame {
 
@@ -269,7 +244,6 @@ public class InterfazHistorialPedidos extends JFrame {
 
     private void actualizarTotal() {
         double total = 0;
-
         try {
             for (int i = 0; i < modeloTabla.getRowCount(); i++) {
                 Object val = modeloTabla.getValueAt(i, 4); // Columna Total (índice 4)
@@ -280,7 +254,6 @@ public class InterfazHistorialPedidos extends JFrame {
                     }
                 }
             }
-
             if (esAdmin) {
                 lblTotal.setText("Total Acumulado en Ventas: $" + String.format("%.2f", total) + " MXN");
             } else {
@@ -288,15 +261,6 @@ public class InterfazHistorialPedidos extends JFrame {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private void aplicarFiltroTexto() {
-        String texto = txtFiltroBusqueda.getText().trim();
-        if (texto.isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto));
         }
     }
 
@@ -381,7 +345,6 @@ public class InterfazHistorialPedidos extends JFrame {
             popup.add(itemCatalogo);
             popup.add(itemCarrito);
         }
-
         popup.addSeparator();
         JMenuItem itemCerrarSesion = new JMenuItem("  🚪  Cerrar Sesión");
         itemCerrarSesion.addActionListener(e -> { new InterfazLogin().setVisible(true); dispose(); });
@@ -399,7 +362,6 @@ public class InterfazHistorialPedidos extends JFrame {
                 if (getModel().isPressed()) g2.setColor(bg.darker());
                 else if (getModel().isRollover()) g2.setColor(bg.brighter());
                 else g2.setColor(bg);
-                g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
                 g2.dispose();
                 super.paintComponent(g);
             }
@@ -413,6 +375,4 @@ public class InterfazHistorialPedidos extends JFrame {
         btn.setPreferredSize(new Dimension(ancho, alto));
         return btn;
     }
-
-
 }

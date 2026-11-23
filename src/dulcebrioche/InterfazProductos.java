@@ -4,33 +4,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.RenderingHints;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
+import javax.swing.*;
+import java.awt.*;
 
 public class InterfazProductos extends JFrame {
 
@@ -263,7 +238,7 @@ public class InterfazProductos extends JFrame {
             ex.printStackTrace();
         }
     }
-
+    
     private void accionEliminarProducto(Producto p) {
         int confirmacion = JOptionPane.showConfirmDialog(
             this,
@@ -278,16 +253,12 @@ public class InterfazProductos extends JFrame {
             prod.setNombreProducto(p.NombreProducto);
 
             Conecta bd = new Conecta();
-            boolean exito = bd.eliminarProducto(prod);
+            bd.eliminarProducto(prod);
             bd.desconectar();
 
-            if (exito) {
-                JOptionPane.showMessageDialog(this, "Producto eliminado correctamente del catálogo.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                cargarProductosBD();
-                cargarProductosEnPantalla();
-            } else {
-                JOptionPane.showMessageDialog(this, "No se pudo eliminar el producto.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            JOptionPane.showMessageDialog(this, "Producto eliminado correctamente del catálogo.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            cargarProductosBD();
+            cargarProductosEnPantalla();
         }
     }
 

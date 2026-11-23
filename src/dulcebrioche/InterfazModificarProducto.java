@@ -214,15 +214,13 @@ public class InterfazModificarProducto extends JFrame {
     }
 
     private void guardarCambios()
-{
+    {   
     if(txtNombre.getText().trim().isEmpty()
             ||
        txtPrecio.getText().trim().isEmpty())
     {
         JOptionPane.showMessageDialog(
-                this,
-                "Por favor completa los campos obligatorios.");
-
+                this,"Por favor completa los campos obligatorios.");
         return;
     }
 
@@ -243,36 +241,27 @@ public class InterfazModificarProducto extends JFrame {
 
         if(actualizado)
         {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Producto actualizado correctamente");
-
-            new InterfazProductos(true)
-                    .setVisible(true);
-
+            JOptionPane.showMessageDialog(this,"Producto actualizado correctamente");
+            new InterfazProductos(true).setVisible(true);
             dispose();
         }
     }
     catch(NumberFormatException ex)
     {
         JOptionPane.showMessageDialog(
-                this,
-                "Precio, stock y días deben ser numéricos.");
+                this,"Precio, stock y días deben ser numéricos.");
     }
     catch(Exception ex)
     {
         ex.printStackTrace();
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error al actualizar el producto.");
+        JOptionPane.showMessageDialog(this,"Error al actualizar el producto.");
     }
 
         if (txtNombre.getText().trim().isEmpty() || txtPrecio.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor completa los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+        
         try {
             double Precio = Double.parseDouble(txtPrecio.getText().trim());
             int Stock = Integer.parseInt(txtStock.getText().trim());

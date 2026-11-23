@@ -796,7 +796,7 @@ public int insertarPersona(Persona obj)
         return lista;
     }
 
-    public boolean actualizarEstadoPedido(int idPedido,int idEstado)
+    public void actualizarEstadoPedido(int idPedido,int idEstado)
     {
         try
         {
@@ -808,13 +808,11 @@ public int insertarPersona(Persona obj)
             ps.setInt(1,idEstado);
             ps.setInt(2,idPedido);
             ps.executeUpdate();
-            return true;
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
-        return false;
     }
 
     public ArrayList<String[]> obtenerPedidosPerfil(int idUsuario)
@@ -900,17 +898,11 @@ public int insertarPersona(Persona obj)
         return false;
     }
 
-    public boolean actualizarCuenta(
-        Persona p,
-        String correo,
-        String contrasena)
+    public boolean actualizarCuenta(Persona p,String correo,String contrasena)
 {
     try
     {
-
-        PreparedStatement ps =
-                con.prepareStatement(
-
+        PreparedStatement ps =con.prepareStatement(
                 "UPDATE personas " +
                 "SET Nombre = ?, " +
                 "ApellidoPaterno = ?, " +
@@ -924,7 +916,6 @@ public int insertarPersona(Persona obj)
                 "Estado = ?, " +
                 "CodigoPostal = ? " +
                 "WHERE IdPersona = ?"
-
                 );
 
         ps.setString(1,p.getNombre());
@@ -938,21 +929,17 @@ public int insertarPersona(Persona obj)
         ps.setString(9,p.getCiudad());
         ps.setString(10,p.getEstado());
         ps.setString(11,p.getCodigoPostal());
-
         ps.setInt(12, Sesion.idPersona);
-
         ps.executeUpdate();
 
         if(contrasena != null &&
            !contrasena.trim().isEmpty())
         {
             ps = con.prepareStatement(
-
             "UPDATE usuarios " +
             "SET CorreoElectronico = ?, " +
             "Contrasena = ? " +
             "WHERE IdUsuario = ?"
-
             );
 
             ps.setString(1,correo);
@@ -962,11 +949,9 @@ public int insertarPersona(Persona obj)
         else
         {
             ps = con.prepareStatement(
-
             "UPDATE usuarios " +
             "SET CorreoElectronico = ? " +
             "WHERE IdUsuario = ?"
-
             );
 
             ps.setString(1,correo);
@@ -974,16 +959,15 @@ public int insertarPersona(Persona obj)
         }
 
         ps.executeUpdate();
-
         return true;
     }
     catch(Exception e)
     {
         e.printStackTrace();
     }
-
     return false;
 }
+
 public Persona LlenarDatosPersona()
 {
     Persona p = null;
@@ -1016,27 +1000,16 @@ public Persona LlenarDatosPersona()
         if(rs.next())
         {
             p = new Persona();
-
             p.setNombre(rs.getString("Nombre"));
-
             p.setApellidoPaterno(rs.getString("ApellidoPaterno"));
-
             p.setApellidoMaterno(rs.getString("ApellidoMaterno"));
-
             p.setTelefono(rs.getString("Telefono"));
-
             p.setCalle(rs.getString("Calle"));
-
             p.setNumeroExterior(rs.getString("NumeroExterior"));
-
             p.setNumeroInterior(rs.getString("NumeroInterior"));
-
             p.setColonia(rs.getString("Colonia"));
-
             p.setCiudad(rs.getString("Ciudad"));
-
             p.setEstado(rs.getString("Estado"));
-
             p.setCodigoPostal(rs.getString("CodigoPostal"));
         }
     }
@@ -1047,6 +1020,7 @@ public Persona LlenarDatosPersona()
 
     return p;
 }
+
 public String obtenerCorreo()
 {
     String correo = "";
@@ -1078,15 +1052,11 @@ public String obtenerCorreo()
     return correo;
 }
 
-public boolean actualizarDatos(
-        Persona p,
-        String correo)
+public boolean actualizarDatos(Persona p,String correo)
 {
     try
     {
-        PreparedStatement ps =
-                con.prepareStatement(
-
+        PreparedStatement ps =con.prepareStatement(
                 "UPDATE personas " +
                 "SET Nombre = ?, " +
                 "ApellidoPaterno = ?, " +
@@ -1100,7 +1070,6 @@ public boolean actualizarDatos(
                 "Estado = ?, " +
                 "CodigoPostal = ? " +
                 "WHERE IdPersona = ?"
-
                 );
 
         ps.setString(1,p.getNombre());
@@ -1114,49 +1083,33 @@ public boolean actualizarDatos(
         ps.setString(9,p.getCiudad());
         ps.setString(10,p.getEstado());
         ps.setString(11,p.getCodigoPostal());
-
-        ps.setInt(
-                12,
-                Sesion.idPersona);
-
+        ps.setInt(12,Sesion.idPersona);
         ps.executeUpdate();
 
         ps =
         con.prepareStatement(
-
         "UPDATE usuarios " +
         "SET CorreoElectronico = ? " +
         "WHERE IdUsuario = ?"
-
         );
 
-        ps.setString(
-                1,
-                correo);
-
-        ps.setInt(
-                2,
-                Sesion.idUsuario);
-
+        ps.setString(1,correo);
+        ps.setInt(2,Sesion.idUsuario);
         ps.executeUpdate();
-
         return true;
     }
     catch(Exception e)
     {
         e.printStackTrace();
     }
-
     return false;
 }
-public boolean actualizarProducto(
-        Producto p,
-        byte[] imagenNueva)
+
+public boolean actualizarProducto(Producto p,byte[] imagenNueva)
 {
     try
     {
         PreparedStatement ps = con.prepareStatement(
-
                 "UPDATE productos " +
                 "SET NombreProducto = ?, " +
                 "Categoria = ?, " +
@@ -1165,41 +1118,27 @@ public boolean actualizarProducto(
                 "DiasAnticipacion = ?, " +
                 "Descripcion = ? " +
                 "WHERE IdProducto = ?"
-
                 );
 
         ps.setString(1,p.getNombreProducto());
-
         ps.setString(2,p.getCategoria());
-
         ps.setDouble(3,p.getPrecio());
-
         ps.setInt(4,p.getStock());
-
         ps.setInt(5,p.getDiasAnticipacion());
-
         ps.setString(6,p.getDescripcion());
-
         ps.setInt(7,p.getIdProducto());
-
         ps.executeUpdate();
-
         // Actualizar imagen si seleccionaron una
-
         if(imagenNueva != null)
         {
             ps =con.prepareStatement(
-
             "UPDATE imagenesproducto " +
             "SET Imagen = ? " +
             "WHERE IdProducto = ?"
-
             );
 
             ps.setBytes(1,imagenNueva);
-
             ps.setInt(2,p.getIdProducto());
-
             int filas =ps.executeUpdate();
 
             // Si no había imagen previamente
@@ -1207,28 +1146,22 @@ public boolean actualizarProducto(
             if(filas == 0)
             {
                 ps =con.prepareStatement(
-
                 "INSERT INTO imagenesproducto(" +
                 "IdProducto, Imagen" +
                 ") VALUES(?,?)"
 
                 );
-
                 ps.setInt(1,p.getIdProducto());
-
                 ps.setBytes(2,imagenNueva);
-
                 ps.executeUpdate();
             }
         }
-
         return true;
     }
     catch(Exception e)
     {
         e.printStackTrace();
     }
-
     return false;
 }
 

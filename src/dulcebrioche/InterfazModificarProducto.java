@@ -237,21 +237,34 @@ public class InterfazModificarProducto extends JFrame {
 
         Conecta bd = new Conecta();
 
-        boolean actualizado = bd.actualizarProducto(producto,imagenBytes);
+try
+{
+    bd.actualizarProducto(
+            producto,
+            imagenBytes);
 
-        bd.desconectar();
+    JOptionPane.showMessageDialog(
+            this,
+            "Producto actualizado correctamente");
 
-        if(actualizado)
-        {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Producto actualizado correctamente");
+    new InterfazProductos(true)
+            .setVisible(true);
 
-            new InterfazProductos(true)
-                    .setVisible(true);
+    dispose();
+}
+catch(RuntimeException e)
+{
+    JOptionPane.showMessageDialog(
+            this,
+            e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+}
+finally
+{
+    bd.desconectar();
+}
 
-            dispose();
-        }
     }
     catch(NumberFormatException ex)
     {

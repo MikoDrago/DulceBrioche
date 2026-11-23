@@ -309,7 +309,7 @@ public class InterfazHistorialPedidos extends JFrame {
         }
     }
 
-    private void cambiarEstatusPedidoAdmin() {
+    public void cambiarEstatusPedidoAdmin() {
         int row = tablaPedidos.getSelectedRow();
 
         if (row < 0) {
@@ -329,22 +329,12 @@ public class InterfazHistorialPedidos extends JFrame {
             "Cancelado"
         };
 
-        String seleccion = (String) JOptionPane.showInputDialog(
-                this,
-                "Selecciona el nuevo estatus:",
-                "Estado del Pedido",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                opciones,
-                opciones[0]);
-
+        String seleccion = (String) JOptionPane.showInputDialog(this,"Selecciona el nuevo estatus:","Estado del Pedido",JOptionPane.QUESTION_MESSAGE,null, opciones, opciones[0]);
         if (seleccion == null) {
             return;
         }
-
         try {
             int idEstado = 1;
-
             switch (seleccion) {
                 case "Pendiente": idEstado = 1; break;
                 case "Confirmado": idEstado = 2; break;
@@ -353,11 +343,9 @@ public class InterfazHistorialPedidos extends JFrame {
                 case "Entregado": idEstado = 5; break;
                 case "Cancelado": idEstado = 6; break;
             }
-
             Conecta bd = new Conecta();
             bd.actualizarEstadoPedido(idPedido, idEstado);
             bd.desconectar();
-
             cargarDatos();
             JOptionPane.showMessageDialog(this, "Estado actualizado con éxito.");
         } catch (Exception e) {

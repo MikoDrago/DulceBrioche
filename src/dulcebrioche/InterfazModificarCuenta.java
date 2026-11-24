@@ -171,10 +171,7 @@ public class InterfazModificarCuenta extends JFrame {
        ||
        txtCorreo.getText().trim().isEmpty())
     {
-        JOptionPane.showMessageDialog(
-                this,
-                "El nombre y correo son obligatorios.");
-
+        JOptionPane.showMessageDialog(this,"El nombre y correo son obligatorios.");
         return;
     }
 
@@ -213,9 +210,7 @@ public class InterfazModificarCuenta extends JFrame {
         if(actualizado)
         {
             JOptionPane.showMessageDialog(this, "Datos actualizados correctamente");
-
             new InterfazPerfil().setVisible(true);
-
             dispose();
         }
     }

@@ -839,7 +839,7 @@ public class Conecta {
         return lista;
     }
 
-    public boolean actualizarEstadoPedido(int idPedido,int idEstado)
+    public void actualizarEstadoPedido(int idPedido,int idEstado)
     {
         try
         {
@@ -851,13 +851,11 @@ public class Conecta {
             ps.setInt(1,idEstado);
             ps.setInt(2,idPedido);
             ps.executeUpdate();
-            return true;
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
-        return false;
     }
 
     public ArrayList<String[]> obtenerPedidosPerfil(int idUsuario)
@@ -907,7 +905,7 @@ public class Conecta {
         return lista;
     }
     
-    public boolean eliminarProducto(Producto obj) {
+    public void eliminarProducto(Producto obj) {
         System.out.println("Eliminando producto: " + obj.getNombreProducto());
         try {
             PreparedStatement ps = con.prepareStatement("DELETE FROM productos WHERE NombreProducto = ?");
@@ -916,13 +914,10 @@ public class Conecta {
             int filasEliminadas = ps.executeUpdate();
             System.out.println("Numero de registros eliminados: " + filasEliminadas);
             ps.close();
-
-            return filasEliminadas > 0;
         } catch (SQLException sqle) {
             System.out.println("Error al eliminar producto: " + sqle.getMessage());
             sqle.printStackTrace();
         }
-        return false;
     }
 
     public boolean eliminarCuentaCliente(int idPersona) {
@@ -943,302 +938,265 @@ public class Conecta {
         return false;
     }
 
-    public boolean actualizarCuenta(Persona p, String correo, String contrasena)
-{
-    try
+    public boolean actualizarCuenta(Persona p,String correo,String contrasena)
     {
-
-        PreparedStatement ps =
-                con.prepareStatement(
-
-                "UPDATE personas " +
-                "SET Nombre = ?, " +
-                "ApellidoPaterno = ?, " +
-                "ApellidoMaterno = ?, " +
-                "Telefono = ?, " +
-                "Calle = ?, " +
-                "NumeroExterior = ?, " +
-                "NumeroInterior = ?, " +
-                "Colonia = ?, " +
-                "Ciudad = ?, " +
-                "Estado = ?, " +
-                "CodigoPostal = ? " +
-                "WHERE IdPersona = ?"
-
-                );
-
-        ps.setString(1,p.getNombre());
-        ps.setString(2,p.getApellidoPaterno());
-        ps.setString(3,p.getApellidoMaterno());
-        ps.setString(4,p.getTelefono());
-        ps.setString(5,p.getCalle());
-        ps.setString(6,p.getNumeroExterior());
-        ps.setString(7,p.getNumeroInterior());
-        ps.setString(8,p.getColonia());
-        ps.setString(9,p.getCiudad());
-        ps.setString(10,p.getEstado());
-        ps.setString(11,p.getCodigoPostal());
-
-        ps.setInt(12, Sesion.idPersona);
-
-        ps.executeUpdate();
-
-        if(contrasena != null &&
-           !contrasena.trim().isEmpty())
+        try
         {
-            ps = con.prepareStatement(
+            PreparedStatement ps =con.prepareStatement(
+                    "UPDATE personas " +
+                    "SET Nombre = ?, " +
+                    "ApellidoPaterno = ?, " +
+                    "ApellidoMaterno = ?, " +
+                    "Telefono = ?, " +
+                    "Calle = ?, " +
+                    "NumeroExterior = ?, " +
+                    "NumeroInterior = ?, " +
+                    "Colonia = ?, " +
+                    "Ciudad = ?, " +
+                    "Estado = ?, " +
+                    "CodigoPostal = ? " +
+                    "WHERE IdPersona = ?"
+                    );
 
-            "UPDATE usuarios " +
-            "SET CorreoElectronico = ?, " +
-            "Contrasena = ? " +
-            "WHERE IdUsuario = ?"
+            ps.setString(1,p.getNombre());
+            ps.setString(2,p.getApellidoPaterno());
+            ps.setString(3,p.getApellidoMaterno());
+            ps.setString(4,p.getTelefono());
+            ps.setString(5,p.getCalle());
+            ps.setString(6,p.getNumeroExterior());
+            ps.setString(7,p.getNumeroInterior());
+            ps.setString(8,p.getColonia());
+            ps.setString(9,p.getCiudad());
+            ps.setString(10,p.getEstado());
+            ps.setString(11,p.getCodigoPostal());
+            ps.setInt(12, Sesion.idPersona);
+            ps.executeUpdate();
 
-            );
-
-            ps.setString(1,correo);
-            ps.setString(2,contrasena);
-            ps.setInt(3,Sesion.idUsuario);
-        }
-        else
-        {
-            ps = con.prepareStatement(
-
-            "UPDATE usuarios " +
-            "SET CorreoElectronico = ? " +
-            "WHERE IdUsuario = ?"
-
-            );
-
-            ps.setString(1,correo);
-            ps.setInt(2,Sesion.idUsuario);
-        }
-
-        ps.executeUpdate();
-
-        return true;
-    }
-    catch(Exception e)
-    {
-        e.printStackTrace();
-    }
-
-    return false;
-}
-public Persona LlenarDatosPersona()
-{
-    Persona p = null;
-
-    try
-    {
-        PreparedStatement ps = con.prepareStatement(
-
-                "SELECT " +
-                "Nombre, " +
-                "ApellidoPaterno, " +
-                "ApellidoMaterno, " +
-                "Telefono, " +
-                "Calle, " +
-                "NumeroExterior, " +
-                "NumeroInterior, " +
-                "Colonia, " +
-                "Ciudad, " +
-                "Estado, " +
-                "CodigoPostal " +
-                "FROM personas " +
-                "WHERE IdPersona = ?"
-
-                );
-
-        ps.setInt(  1, Sesion.idPersona);
-
-        ResultSet rs = ps.executeQuery();
-
-        if(rs.next())
-        {
-            p = new Persona();
-
-            p.setNombre(rs.getString("Nombre"));
-
-            p.setApellidoPaterno(rs.getString("ApellidoPaterno"));
-
-            p.setApellidoMaterno(rs.getString("ApellidoMaterno"));
-
-            p.setTelefono(rs.getString("Telefono"));
-
-            p.setCalle(rs.getString("Calle"));
-
-            p.setNumeroExterior(rs.getString("NumeroExterior"));
-
-            p.setNumeroInterior(rs.getString("NumeroInterior"));
-
-            p.setColonia(rs.getString("Colonia"));
-
-            p.setCiudad(rs.getString("Ciudad"));
-
-            p.setEstado(rs.getString("Estado"));
-
-            p.setCodigoPostal(rs.getString("CodigoPostal"));
-        }
-    }
-    catch(Exception e)
-    {
-        e.printStackTrace();
-    }
-
-    return p;
-}
-public String obtenerCorreo()
-{
-    String correo = "";
-
-    try
-    {
-        PreparedStatement ps = con.prepareStatement(
-
-                "SELECT CorreoElectronico " +
-                "FROM usuarios " +
-                "WHERE IdUsuario = ?"
-
-                );
-
-        ps.setInt(1, Sesion.idUsuario);
-
-        ResultSet rs =ps.executeQuery();
-
-        if(rs.next())
-        {
-            correo =rs.getString("CorreoElectronico");
-        }
-    }
-    catch(Exception e)
-    {
-        e.printStackTrace();
-    }
-
-    return correo;
-}
-
-public void actualizarDatos(Persona p, String correo, String contrasena)
-{
-    try
-    {
-        PreparedStatement ps =con.prepareStatement(
-                "UPDATE personas " +
-                "SET Nombre = ?, " +
-                "ApellidoPaterno = ?, " +
-                "ApellidoMaterno = ?, " +
-                "Telefono = ?, " +
-                "Calle = ?, " +
-                "NumeroExterior = ?, " +
-                "NumeroInterior = ?, " +
-                "Colonia = ?, " +
-                "Ciudad = ?, " +
-                "Estado = ?, " +
-                "CodigoPostal = ? " +
-                "WHERE IdPersona = ?"
-                );
-        ps.setString(1,p.getNombre());
-        ps.setString(2,p.getApellidoPaterno());
-        ps.setString(3,p.getApellidoMaterno());
-        ps.setString(4,p.getTelefono());
-        ps.setString(5,p.getCalle());
-        ps.setString(6,p.getNumeroExterior());
-        ps.setString(7,p.getNumeroInterior());
-        ps.setString(8,p.getColonia());
-        ps.setString(9,p.getCiudad());
-        ps.setString(10,p.getEstado());
-        ps.setString(11,p.getCodigoPostal());
-        ps.setInt(12,Sesion.idPersona);
-        int filas = ps.executeUpdate();
-        if(filas == 0)
-        {
-            throw new RuntimeException("No se encontró la cuenta.");
-        }
-        if(contrasena != null && !contrasena.trim().isEmpty())
-        {
-            ps = con.prepareStatement(
-            "UPDATE usuarios " +
-            "SET CorreoElectronico = ?, " +
-            "Contrasena = ? " +
-            "WHERE IdUsuario = ?"
-            );
-            ps.setString(1,correo);
-            ps.setString(2,contrasena);
-            ps.setInt(3,Sesion.idUsuario);
-        }
-        else
-        {
-            ps = con.prepareStatement(
-            "UPDATE usuarios " +
-            "SET CorreoElectronico = ? " +
-            "WHERE IdUsuario = ?"
-            );
-            ps.setString(1,correo);
-            ps.setInt(2,Sesion.idUsuario);
-        }
-
-        ps.executeUpdate();
-    }
-    catch(SQLException e)
-    {
-        e.printStackTrace();
-    }
-}
-
-public void actualizarProducto(Producto p, byte[] imagenNueva)
-{
-    try
-    {
-        PreparedStatement ps = con.prepareStatement(
-                "UPDATE productos " +
-                "SET NombreProducto = ?, " +
-                "Categoria = ?, " +
-                "Precio = ?, " +
-                "Stock = ?, " +
-                "DiasAnticipacion = ?, " +
-                "Descripcion = ? " +
-                "WHERE IdProducto = ?"
-                );
-        ps.setString(1,p.getNombreProducto());
-        ps.setString(2,p.getCategoria());
-        ps.setDouble(3,p.getPrecio());
-        ps.setInt(4,p.getStock());
-        ps.setInt(5,p.getDiasAnticipacion());
-        ps.setString(6,p.getDescripcion());
-        ps.setInt(7,p.getIdProducto());
-        int filas = ps.executeUpdate();
-        if(filas == 0)
-        {
-            throw new RuntimeException("No se encontró el producto.");
-        }
-        if(imagenNueva != null)
-        {
-            ps =con.prepareStatement(
-
-            "UPDATE imagenesproducto " +
-            "SET Imagen = ? " +
-            "WHERE IdProducto = ?"
-            );
-            ps.setBytes(1,imagenNueva);
-            ps.setInt(2,p.getIdProducto());
-            int actualizadas = ps.executeUpdate();
-            if(actualizadas == 0)
+            if(contrasena != null &&
+            !contrasena.trim().isEmpty())
             {
                 ps = con.prepareStatement(
-                "INSERT INTO imagenesproducto(" +
-                "IdProducto,Imagen" +
-                ") VALUES(?,?)"
+                "UPDATE usuarios " +
+                "SET CorreoElectronico = ?, " +
+                "Contrasena = ? " +
+                "WHERE IdUsuario = ?"
                 );
-                ps.setInt(1,p.getIdProducto());
-                ps.setBytes(2,imagenNueva);
-                ps.executeUpdate();
+
+                ps.setString(1,correo);
+                ps.setString(2,contrasena);
+                ps.setInt(3,Sesion.idUsuario);
+            }
+            else
+            {
+                ps = con.prepareStatement(
+                "UPDATE usuarios " +
+                "SET CorreoElectronico = ? " +
+                "WHERE IdUsuario = ?"
+                );
+
+                ps.setString(1,correo);
+                ps.setInt(2,Sesion.idUsuario);
+            }
+
+            ps.executeUpdate();
+            return true;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Persona LlenarDatosPersona()
+    {
+        Persona p = null;
+
+        try
+        {
+            PreparedStatement ps = con.prepareStatement(
+
+                    "SELECT " +
+                    "Nombre, " +
+                    "ApellidoPaterno, " +
+                    "ApellidoMaterno, " +
+                    "Telefono, " +
+                    "Calle, " +
+                    "NumeroExterior, " +
+                    "NumeroInterior, " +
+                    "Colonia, " +
+                    "Ciudad, " +
+                    "Estado, " +
+                    "CodigoPostal " +
+                    "FROM personas " +
+                    "WHERE IdPersona = ?"
+
+                    );
+
+            ps.setInt(  1, Sesion.idPersona);
+
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next())
+            {
+                p = new Persona();
+                p.setNombre(rs.getString("Nombre"));
+                p.setApellidoPaterno(rs.getString("ApellidoPaterno"));
+                p.setApellidoMaterno(rs.getString("ApellidoMaterno"));
+                p.setTelefono(rs.getString("Telefono"));
+                p.setCalle(rs.getString("Calle"));
+                p.setNumeroExterior(rs.getString("NumeroExterior"));
+                p.setNumeroInterior(rs.getString("NumeroInterior"));
+                p.setColonia(rs.getString("Colonia"));
+                p.setCiudad(rs.getString("Ciudad"));
+                p.setEstado(rs.getString("Estado"));
+                p.setCodigoPostal(rs.getString("CodigoPostal"));
             }
         }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return p;
     }
-    catch(SQLException e)
+
+    public String obtenerCorreo()
     {
-        throw new RuntimeException("Error al actualizar el producto.",e);
+        String correo = "";
+
+        try
+        {
+            PreparedStatement ps = con.prepareStatement(
+
+                    "SELECT CorreoElectronico " +
+                    "FROM usuarios " +
+                    "WHERE IdUsuario = ?"
+
+                    );
+
+            ps.setInt(1, Sesion.idUsuario);
+
+            ResultSet rs =ps.executeQuery();
+
+            if(rs.next())
+            {
+                correo =rs.getString("CorreoElectronico");
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return correo;
     }
-}
+
+    public void actualizarDatos(Persona p, String correo, String contrasena)
+    {
+        try
+        {
+            PreparedStatement ps =con.prepareStatement(
+                    "UPDATE personas " +
+                    "SET Nombre = ?, " +
+                    "ApellidoPaterno = ?, " +
+                    "ApellidoMaterno = ?, " +
+                    "Telefono = ?, " +
+                    "Calle = ?, " +
+                    "NumeroExterior = ?, " +
+                    "NumeroInterior = ?, " +
+                    "Colonia = ?, " +
+                    "Ciudad = ?, " +
+                    "Estado = ?, " +
+                    "CodigoPostal = ? " +
+                    "WHERE IdPersona = ?"
+                    );
+            ps.setString(1,p.getNombre());
+            ps.setString(2,p.getApellidoPaterno());
+            ps.setString(3,p.getApellidoMaterno());
+            ps.setString(4,p.getTelefono());
+            ps.setString(5,p.getCalle());
+            ps.setString(6,p.getNumeroExterior());
+            ps.setString(7,p.getNumeroInterior());
+            ps.setString(8,p.getColonia());
+            ps.setString(9,p.getCiudad());
+            ps.setString(10,p.getEstado());
+            ps.setString(11,p.getCodigoPostal());
+            ps.setInt(12,Sesion.idPersona);
+            ps.executeUpdate();
+
+            ps =con.prepareStatement(
+            "UPDATE usuarios " +
+            "SET CorreoElectronico = ? " +
+            "WHERE IdUsuario = ?"
+            );
+
+            ps.setString(1,correo);
+            ps.setInt(2,Sesion.idUsuario);
+            ps.executeUpdate();
+            
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean actualizarProducto(Producto p,byte[] imagenNueva)
+    {
+        try
+        {
+            PreparedStatement ps = con.prepareStatement(
+                    "UPDATE productos " +
+                    "SET NombreProducto = ?, " +
+                    "Categoria = ?, " +
+                    "Precio = ?, " +
+                    "Stock = ?, " +
+                    "DiasAnticipacion = ?, " +
+                    "Descripcion = ? " +
+                    "WHERE IdProducto = ?"
+                    );
+            ps.setString(1,p.getNombreProducto());
+            ps.setString(2,p.getCategoria());
+            ps.setDouble(3,p.getPrecio());
+            ps.setInt(4,p.getStock());
+            ps.setInt(5,p.getDiasAnticipacion());
+            ps.setString(6,p.getDescripcion());
+            ps.setInt(7,p.getIdProducto());
+            ps.executeUpdate();
+            // Actualizar imagen si seleccionaron una
+            if(imagenNueva != null)
+            {
+                ps =con.prepareStatement(
+                "UPDATE imagenesproducto " +
+                "SET Imagen = ? " +
+                "WHERE IdProducto = ?"
+                );
+                ps.setBytes(1,imagenNueva);
+                ps.setInt(2,p.getIdProducto());
+                int filas =ps.executeUpdate();
+
+                // Si no había imagen previamente
+
+                if(filas == 0)
+                {
+                    ps =con.prepareStatement(
+                    "INSERT INTO imagenesproducto(" +
+                    "IdProducto,Imagen" +
+                    ") VALUES(?,?)"
+                    );
+                    ps.setInt(1,p.getIdProducto());
+                    ps.setBytes(2,imagenNueva);
+                    ps.executeUpdate();
+                }
+            }
+            return true;
+        }
+        catch(SQLException e)
+        {
+            throw new RuntimeException("Error al actualizar el producto.",e);
+        }
+       //return false;
+    }
 
 }

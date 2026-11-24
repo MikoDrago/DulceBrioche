@@ -293,60 +293,47 @@ public class InterfazRegistro extends JFrame {
 
         JButton btnGuardar = crearBotonEstilizado("Guardar Registro", COLOR_TITULO, Color.WHITE);
         btnGuardar.addActionListener(e -> {
+ if(validarCamposPaso2())
+    {
+        try
+        {
+            Conecta bd = new Conecta();
 
-            if(validarCamposPaso2())
-            {
-                try
-                {
-                    Conecta bd = new Conecta();
+            Persona p = new Persona();
 
-                    Persona p = new Persona();
+            p.setNombre(txtNombre.getText());
+            p.setApellidoPaterno(txtApellidoPaterno.getText());
+            p.setApellidoMaterno(txtApellidoMaterno.getText());
+            p.setTelefono(txtTelefono.getText());
+            p.setCalle(txtCalle.getText());
+            p.setNumeroExterior(txtNumeroExterior.getText());
+            p.setNumeroInterior(txtNumeroInterior.getText());
+            p.setColonia(txtColonia.getText());
+            p.setCiudad(txtCiudad.getText());
+            p.setEstado(txtEstado.getText());
+            p.setCodigoPostal(txtCodigoPostal.getText());
 
-                    p.setNombre(txtNombre.getText());
-                    p.setApellidoPaterno(txtApellidoPaterno.getText());
-                    p.setApellidoMaterno(txtApellidoMaterno.getText());
-                    p.setTelefono(txtTelefono.getText());
-                    p.setCalle(txtCalle.getText());
-                    p.setNumeroExterior(txtNumeroExterior.getText());
-                    p.setNumeroInterior(txtNumeroInterior.getText());
-                    p.setColonia(txtColonia.getText());
-                    p.setCiudad(txtCiudad.getText());
-                    p.setEstado(txtEstado.getText());
+            Usuario u = new Usuario();
 
-                    p.setCodigoPostal(txtCodigoPostal.getText());
+            // Cliente
+            u.setIdRol(2);
+            u.setUsuario(txtUsuario.getText());
+            u.setCorreo(txtCorreo.getText());
+            u.setContrasena(new String(txtContrasena.getPassword()));
 
-                    int idPersona = bd.insertarPersona(p);
-
-                    Usuario u = new Usuario();
-
-                    u.setIdPersona(idPersona);
-                    // Rol Cliente
-                    u.setIdRol(2);
-                    u.setUsuario(txtUsuario.getText());
-                    u.setCorreo(txtCorreo.getText());
-                    u.setContrasena(
-                            new String(
-                                    txtContrasena.getPassword()));
-
-                    bd.insertarUsuario(u);
-
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Registro completado correctamente");
-
-                    bd.desconectar();
-
-                }
-                catch(Exception ex)
-                {
-                    ex.printStackTrace();
-
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Error al registrar");
-                }
-            }
-        });
+            bd.InsertPersonaUsuario(p,u);
+            JOptionPane.showMessageDialog(null,"Registro completado correctamente");
+            bd.desconectar();
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,"Error al registrar");
+        }
+    }
+    InterfazPerfil perfil = new InterfazPerfil();
+    perfil.setVisible(true);
+});
 
         panelBotones.add(btnAtras);
         panelBotones.add(btnGuardar);

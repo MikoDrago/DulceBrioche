@@ -192,68 +192,47 @@ public class InterfazAgregarProductos extends JFrame {
         JButton btnGuardar = crearBotonEstilizado("Guardar Producto", COLOR_TITULO, Color.WHITE);
         btnGuardar.addActionListener(e -> {
 
-    if(validarFormulario())
+try
     {
-        try
+        if(txtNombreProducto.getText().trim().isEmpty()|| txtPrecio.getText().trim().isEmpty())
         {
-            Conecta bd = new Conecta();
+            JOptionPane.showMessageDialog(null,"Complete los campos obligatorios");
 
-            Producto p = new Producto();
-
-            p.setNombreProducto(
-                    txtNombreProducto.getText());
-
-            p.setCategoria(
-                    cbCategoria.getSelectedItem()
-                    .toString());
-
-            p.setPrecio(
-                    Double.parseDouble(
-                    txtPrecio.getText()));
-
-            p.setStock(
-                    Integer.parseInt(
-                    txtStock.getText()));
-
-            p.setDiasAnticipacion(
-                    Integer.parseInt(
-                    txtDiasAnticipacion.getText()));
-
-            p.setDescripcion(
-                    txtDescripcion.getText());
-
-            int idProducto =
-                    bd.insertarProducto(p);
-
-            for(byte[] img : imagenes)
-            {
-                bd.insertarImagenProducto(
-                        idProducto,
-                        img);
-            }
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Producto guardado correctamente");
-
-            limpiarCampos();
-
-            imagenes.clear();
-
-            lblImagenes.setText(
-                    "Sin imágenes seleccionadas");
-
-            bd.desconectar();
+            return;
         }
-        catch(Exception ex)
-        {
-            ex.printStackTrace();
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Error al guardar:\n"
-                    + ex.getMessage());
-        }
+        Producto p = new Producto();
+
+        p.setNombreProducto(txtNombreProducto.getText());
+        p.setCategoria(cbCategoria.getSelectedItem().toString());
+        p.setPrecio(Double.parseDouble(txtPrecio.getText()));
+        p.setStock(Integer.parseInt(txtStock.getText()));
+        p.setDiasAnticipacion(Integer.parseInt(txtDiasAnticipacion.getText()));
+        p.setDescripcion(txtDescripcion.getText());
+
+        Conecta bd = new Conecta();
+
+        bd.insertarProducto(p,imagenes);
+        bd.desconectar();
+
+        JOptionPane.showMessageDialog(null,"Producto registrado correctamente");
+
+        new InterfazProductos(true).setVisible(true);
+        dispose();
+    }
+    catch(NumberFormatException ex)
+    {
+        JOptionPane.showMessageDialog(
+                null,
+                "Precio, Stock y Días deben ser valores numéricos");
+    }
+    catch(Exception ex)
+    {
+        ex.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+                null,
+                "Error al registrar el producto");
     }
 });
 

@@ -17,14 +17,38 @@ public class Conecta {
     
     private Connection con = null;
 
-    // Constructor
+//* Constructor
     public Conecta() {
-        conectar();
+        Conectar();
 
     }
-
-    // Método para conectar
-    public void conectar() {
+    
+//* Coneccion a cliente
+    public void ConectarCliente() {
+        try {
+            // Cargar el driver correcto
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String url = "jdbc:mysql://localhost:3306/reposteria?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+            String user = "root";
+            String password = obtenerPassword();
+            System.out.println("Usuario: " + user);
+            if (password == null || password.isBlank()) {
+                throw new SQLException("DB_PASSWORD no está definida en las variables de entorno ni en el archivo .env");
+            }
+            
+            con = DriverManager.getConnection(url, user, password);
+            System.out.println("Conectado a la base de datos en MySQL Server");
+        } catch (ClassNotFoundException cnfe) {
+            System.out.println("Driver JDBC no encontrado: " + cnfe.getMessage());
+        } catch (IOException ioe) {
+            System.out.println("Error al leer el archivo .env: " + ioe.getMessage());
+        } catch (SQLException sqle) {
+            System.out.println("Error al conectar: " + sqle.getMessage());
+        }
+    }
+    
+//* Método para conectar
+    public void Conectar() {
         try {
             
             // Cargar el driver correcto
@@ -51,6 +75,7 @@ public class Conecta {
         }
     }
 
+//* Método para obtener la contraseña de la base de datos desde variables de entorno o archivo .env
     private String obtenerPassword() throws IOException {
         String password = System.getenv("DB_PASSWORD");
         if (password != null && !password.isBlank()) {
@@ -89,7 +114,7 @@ public class Conecta {
         return con;
     }
     
-    //Cierre del metodo Conectar
+//* Cierre del metodo Conectar
     public void desconectar()
     {
         try{
@@ -105,183 +130,201 @@ public class Conecta {
         
     }
     
-    //Inser Persona
-public int insertarPersona(Persona obj)
-{
-    int idPersona = 0;
-
-    try
+//* Insert Persona e Usuario
+    public void InsertPersonaUsuario(Persona persona, Usuario usuario)
     {
-        PreparedStatement ps = con.prepareStatement(
-
-                "INSERT INTO personas(" +
-                "Nombre," +
-                "ApellidoPaterno," +
-                "ApellidoMaterno," +
-                "Telefono," +
-                "Calle," +
-                "NumeroExterior," +
-                "NumeroInterior," +
-                "Colonia," +
-                "Ciudad," +
-                "Estado," +
-                "CodigoPostal" +
-                ") VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-
-                Statement.RETURN_GENERATED_KEYS
-                );
-
-        ps.setString(1,obj.getNombre());
-        ps.setString(2,obj.getApellidoPaterno());
-        ps.setString(3,obj.getApellidoMaterno());
-        ps.setString(4,obj.getTelefono());
-        ps.setString(5,obj.getCalle());
-        ps.setString(6,obj.getNumeroExterior());
-        ps.setString(7,obj.getNumeroInterior());
-        ps.setString(8,obj.getColonia());
-        ps.setString(9,obj.getCiudad());
-        ps.setString(10,obj.getEstado());
-        ps.setString(11,obj.getCodigoPostal());
-
-        ps.executeUpdate();
-        ResultSet rs = ps.getGeneratedKeys();
-
-        if(rs.next())
-        {
-            idPersona = rs.getInt(1);
-        }
-
-        rs.close();
-        ps.close();
-    }
-    catch(SQLException e)
-    {
-        e.printStackTrace();
-    }
-
-    return idPersona;
-}
-    
-    //Inser User
-    public void insertarUsuario(Usuario obj)
-{
-    try
-    {
-    PreparedStatement ps = con.prepareStatement(
-        "INSERT INTO Usuarios(" +
-        "IdPersona,IdRol,NombreUsuario," +
-        "CorreoElectronico,Contrasena) VALUES(?,?,?,?,?)");
-    
-        ps.setInt(1,obj.getIdPersona());
-        ps.setInt(2,obj.getIdRol());
-        ps.setString(3,obj.getUsuario());
-        ps.setString(4,obj.getCorreo());
-        ps.setString(5,obj.getContrasena());
-
-        ps.executeUpdate();
-
-    }
-    catch(SQLException e)
-    {
-        e.printStackTrace();
-    }
-}
-    
-    //Insert Producto
-    public int insertarProducto(Producto obj)
-    {
-        int idProducto = 0;
-
-        String sql =
-        "INSERT INTO Productos(" +
-        "NombreProducto," +
-        "Categoria," +
-        "Precio," +
-        "Stock," +
-        "DiasAnticipacion," +
-        "Descripcion" +
-        ") VALUES('" +
-
-        obj.getNombreProducto() + "','" +
-        obj.getCategoria() + "'," +
-        obj.getPrecio() + "," +
-        obj.getStock() + "," +
-        obj.getDiasAnticipacion() + ",'" +
-        obj.getDescripcion() + "')";
-
         try
         {
+            con.setAutoCommit(false);
+
+            PreparedStatement psPersona =con.prepareStatement(
+                    "INSERT INTO personas(" +
+                    "Nombre," +
+                    "ApellidoPaterno," +
+                    "ApellidoMaterno," +
+                    "Telefono," +
+                    "Calle," +
+                    "NumeroExterior," +
+                    "NumeroInterior," +
+                    "Colonia," +
+                    "Ciudad," +
+                    "Estado," +
+                    "CodigoPostal" +
+                    ") VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+                    );
+
+            psPersona.setString(1,persona.getNombre());
+            psPersona.setString(2,persona.getApellidoPaterno());
+            psPersona.setString(3,persona.getApellidoMaterno());
+            psPersona.setString(4,persona.getTelefono());
+            psPersona.setString(5,persona.getCalle());
+            psPersona.setString(6,persona.getNumeroExterior());
+            psPersona.setString(7,persona.getNumeroInterior());
+            psPersona.setString(8,persona.getColonia());
+            psPersona.setString(9,persona.getCiudad());
+            psPersona.setString(10,persona.getEstado());
+            psPersona.setString(11,persona.getCodigoPostal());
+
+            psPersona.executeUpdate();
             Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery("SELECT LAST_INSERT_ID()");
 
-            stm.executeUpdate(sql);
+            int idPersona = 0;
 
-        }
-        catch(SQLException e)
-        {
-            e.printStackTrace();
-        }
+            if(rs.next())
+            {
+                idPersona = rs.getInt(1);
+            }
 
-        return idProducto;
-    }
-    
-    //Insert Imagen 
-    public void insertarImagenProducto(int idProducto,byte[] imagen)
-    {
-        try
-        {
-            PreparedStatement ps =con.prepareStatement(
+            PreparedStatement psUsuario =
+                    con.prepareStatement(
 
-                    "INSERT INTO ImagenesProducto " +
-                    "(IdProducto, Imagen) " +
-                    "VALUES (?, ?)");
+                    "INSERT INTO usuarios(" +
+                    "IdPersona," +
+                    "IdRol," +
+                    "NombreUsuario," +
+                    "CorreoElectronico," +
+                    "Contrasena" +
+                    ") VALUES(?,?,?,?,?)"
+                    );
+            psUsuario.setInt(1,idPersona);
+            psUsuario.setInt(2,usuario.getIdRol());
+            psUsuario.setString(3,usuario.getUsuario());
+            psUsuario.setString(4,usuario.getCorreo());
+            psUsuario.setString(5,usuario.getContrasena());
+            psUsuario.executeUpdate();
+            con.commit();
 
-            ps.setInt(1, idProducto);
-
-            ps.setBytes(2, imagen);
-
-            ps.executeUpdate();
-
-            ps.close();
-        }
-        catch(SQLException ex)
-        {
-            ex.printStackTrace();
-        }
-    }
-    
-    //Mostrar Productos
-    public ArrayList<Producto> consultarProductos()
-    {
-        ArrayList<Producto> lista =
-                new ArrayList<>();
-
-        try
-        {
-            Statement stm = con.createStatement();
-            ResultSet rs =stm.executeQuery("SELECT * FROM Productos");
-                        while(rs.next())
-                        {
-                            Producto p =new Producto(
-                                    rs.getInt("IdProducto"),
-                                    rs.getString("NombreProducto"),
-                                    rs.getString("Categoria"),
-                                    rs.getDouble("Precio"),
-                                    rs.getInt("Stock"),
-                                    rs.getInt("DiasAnticipacion"),
-                                    rs.getString("Descripcion")
-                                );
-
-                            lista.add(p);
-                        }
-            rs.close();
-            stm.close();
+            System.out.println("Transaccion exitosa");
         }
         catch(Exception e)
         {
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+
+            System.out.println(
+                    "Se cancelo la operacion");
+        }
+    }
+
+//* Insert Producto
+    public void insertarProducto(
+            Producto obj,
+            List<byte[]> imagenes)
+    {
+        try
+        {
+            con.setAutoCommit(false);
+            PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO productos(" +
+                    "NombreProducto," +
+                    "Categoria," +
+                    "Precio," +
+                    "Stock," +
+                    "DiasAnticipacion," +
+                    "Descripcion" +
+                    ") VALUES(?,?,?,?,?,?)"
+                    );
+            ps.setString(1,obj.getNombreProducto());
+            ps.setString(2,obj.getCategoria());
+            ps.setDouble(3,obj.getPrecio());
+            ps.setInt(4,obj.getStock());
+            ps.setInt(5,obj.getDiasAnticipacion());
+            ps.setString(6,obj.getDescripcion());
+
+            ps.executeUpdate();
+
+            Statement stm = con.createStatement();
+
+            ResultSet rs = stm.executeQuery("SELECT LAST_INSERT_ID()");
+
+            int idProducto = 0;
+
+            if(rs.next())
+            {
+                idProducto = rs.getInt(1);
+            }
+
+            if(imagenes != null && !imagenes.isEmpty())
+            {
+                PreparedStatement psImagen = con.prepareStatement(
+                        "INSERT INTO ImagenesProducto(" +
+                        "IdProducto," +
+                        "Imagen" +
+                        ") VALUES(?,?)"
+                        );
+                for(byte[] imagen : imagenes)
+                {
+                    psImagen.setInt(1,idProducto);
+                    psImagen.setBytes(2,imagen);
+                    psImagen.executeUpdate();
+                }
+            }
+
+            con.commit();
+
+            System.out.println("Transaccion exitosa");
+        }
+        catch(Exception e)
+        {
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+            System.out.println("Se cancelo la operacion");
             e.printStackTrace();
         }
-        return lista;
     }
+
+    //* Mostrar Productos
+        public ArrayList<Producto> consultarProductos()
+        {
+            ArrayList<Producto> lista =
+                    new ArrayList<>();
+
+            try
+            {
+                Statement stm = con.createStatement();
+                ResultSet rs =stm.executeQuery("SELECT * FROM Productos");
+                            while(rs.next())
+                            {
+                                Producto p =new Producto(
+                                        rs.getInt("IdProducto"),
+                                        rs.getString("NombreProducto"),
+                                        rs.getString("Categoria"),
+                                        rs.getDouble("Precio"),
+                                        rs.getInt("Stock"),
+                                        rs.getInt("DiasAnticipacion"),
+                                        rs.getString("Descripcion")
+                                    );
+
+                                lista.add(p);
+                            }
+                rs.close();
+                stm.close();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            return lista;
+        }
 
     public byte[] obtenerPrimeraImagen(int idProducto)
     {
@@ -958,9 +1001,9 @@ public int insertarPersona(Persona obj)
             ps.executeUpdate();
             return true;
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al actualizar la cuenta: " + e.getMessage());
         }
         return false;
     }
@@ -1010,9 +1053,9 @@ public int insertarPersona(Persona obj)
                 p.setCodigoPostal(rs.getString("CodigoPostal"));
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al llenar los datos de la persona: " + e.getMessage());
         }
 
         return p;
@@ -1021,31 +1064,25 @@ public int insertarPersona(Persona obj)
     public String obtenerCorreo()
     {
         String correo = "";
-
         try
         {
             PreparedStatement ps = con.prepareStatement(
-
                     "SELECT CorreoElectronico " +
                     "FROM usuarios " +
                     "WHERE IdUsuario = ?"
-
                     );
 
             ps.setInt(1, Sesion.idUsuario);
-
             ResultSet rs =ps.executeQuery();
-
             if(rs.next())
             {
                 correo =rs.getString("CorreoElectronico");
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al obtener el correo: " + e.getMessage());
         }
-
         return correo;
     }
 
@@ -1053,7 +1090,8 @@ public int insertarPersona(Persona obj)
     {
         try
         {
-            PreparedStatement ps =con.prepareStatement(
+            con.setAutoCommit(false);
+            PreparedStatement ps = con.prepareStatement(
                     "UPDATE personas " +
                     "SET Nombre = ?, " +
                     "ApellidoPaterno = ?, " +
@@ -1068,34 +1106,47 @@ public int insertarPersona(Persona obj)
                     "CodigoPostal = ? " +
                     "WHERE IdPersona = ?"
                     );
-            ps.setString(1,p.getNombre());
-            ps.setString(2,p.getApellidoPaterno());
-            ps.setString(3,p.getApellidoMaterno());
-            ps.setString(4,p.getTelefono());
-            ps.setString(5,p.getCalle());
-            ps.setString(6,p.getNumeroExterior());
-            ps.setString(7,p.getNumeroInterior());
-            ps.setString(8,p.getColonia());
-            ps.setString(9,p.getCiudad());
-            ps.setString(10,p.getEstado());
-            ps.setString(11,p.getCodigoPostal());
-            ps.setInt(12,Sesion.idPersona);
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidoPaterno());
+            ps.setString(3, p.getApellidoMaterno());
+            ps.setString(4, p.getTelefono());
+            ps.setString(5, p.getCalle());
+            ps.setString(6, p.getNumeroExterior());
+            ps.setString(7, p.getNumeroInterior());
+            ps.setString(8, p.getColonia());
+            ps.setString(9, p.getCiudad());
+            ps.setString(10, p.getEstado());
+            ps.setString(11, p.getCodigoPostal());
+            ps.setInt(12, Sesion.idPersona);
             ps.executeUpdate();
 
-            ps =con.prepareStatement(
+            ps = con.prepareStatement(
             "UPDATE usuarios " +
             "SET CorreoElectronico = ? " +
             "WHERE IdUsuario = ?"
             );
 
-            ps.setString(1,correo);
-            ps.setInt(2,Sesion.idUsuario);
+            ps.setString(1, correo);
+            ps.setInt(2, Sesion.idUsuario);
             ps.executeUpdate();
-            
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
         catch(SQLException e)
         {
-            e.printStackTrace();
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al revertir la transaccion: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
@@ -1104,7 +1155,6 @@ public int insertarPersona(Persona obj)
         try
         {
             con.setAutoCommit(false);
-
             PreparedStatement ps = con.prepareStatement(
                 "UPDATE productos " +
                 "SET NombreProducto = ?, " +
@@ -1133,7 +1183,6 @@ public int insertarPersona(Persona obj)
                     "SET Imagen = ? " +
                     "WHERE IdProducto = ?"
                 );
-
                 ps.setBytes(1, imagenNueva);
                 ps.setInt(2, p.getIdProducto());
                 int filas = ps.executeUpdate();
@@ -1151,11 +1200,10 @@ public int insertarPersona(Persona obj)
                     ps.executeUpdate();
                 }
             }
-
             con.commit();
             System.out.println("Transaccion exitosa");
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
             if(con != null)
             {
@@ -1165,12 +1213,11 @@ public int insertarPersona(Persona obj)
                 }
                 catch(SQLException ex)
                 {
-                    ex.printStackTrace();
+                    System.err.println("Error al revertir la transaccion: " + ex.getMessage());
                 }
             }
             e.printStackTrace();
             System.out.println("Se cancelo la operacion");
         }
     }
-
 }

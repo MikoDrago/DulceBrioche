@@ -231,29 +231,36 @@ private void cargarCarritoBD()
         return popup;
     }
     private void eliminarSeleccionado()
+{
+    int row = tablaCarrito.getSelectedRow();
+    if(row < 0)
     {
-        int row = tablaCarrito.getSelectedRow();
-        if(row < 0)
+        JOptionPane.showMessageDialog(this, "Selecciona un producto");
+        return;
+    }
+    try
+    {
+        int opcion = JOptionPane.showConfirmDialog( this,"¿Deseas eliminar el producto del carrito?","Confirmar",JOptionPane.YES_NO_OPTION);
+        if(opcion != JOptionPane.YES_OPTION)
         {
-            JOptionPane.showMessageDialog(this,"Selecciona un producto");
             return;
         }
 
-        try
-        {
-            ItemCarrito item = carrito.get(row);
-            Conecta bd = new Conecta();
-            bd.eliminarProductoCarrito(item.IdDetalleCarrito);
-            bd.desconectar();
+        ItemCarrito item = carrito.get(row);
+        Conecta bd = new Conecta();
+        bd.eliminarProductoCarrito(item.IdDetalleCarrito);
+        bd.desconectar();
+        cargarCarritoBD();
+        actualizarTabla();
 
-            cargarCarritoBD();
-            actualizarTabla();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
+        JOptionPane.showMessageDialog(this,"Producto eliminado correctamente");
     }
+    catch(Exception e)
+    {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this,"Error al eliminar el producto");
+    }
+}
 
     private JButton crearBotonEstilizado(String texto, Color bg, Color fg) {
         JButton btn = new JButton(texto) {

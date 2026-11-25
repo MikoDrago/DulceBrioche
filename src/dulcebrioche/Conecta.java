@@ -292,32 +292,29 @@ public class Conecta {
         }
     }
 
-    //* Mostrar Productos
-        public ArrayList<Producto> consultarProductos()
+    //* Select Productos
+    public ArrayList<Producto> consultarProductos()
+    {
+        ArrayList<Producto> lista = new ArrayList<>();
+        try
         {
-            ArrayList<Producto> lista =
-                    new ArrayList<>();
-
-            try
+        Statement stm = con.createStatement();
+        ResultSet rs =stm.executeQuery("SELECT * FROM Productos");
+            while(rs.next())
             {
-                Statement stm = con.createStatement();
-                ResultSet rs =stm.executeQuery("SELECT * FROM Productos");
-                            while(rs.next())
-                            {
-                                Producto p =new Producto(
-                                        rs.getInt("IdProducto"),
-                                        rs.getString("NombreProducto"),
-                                        rs.getString("Categoria"),
-                                        rs.getDouble("Precio"),
-                                        rs.getInt("Stock"),
-                                        rs.getInt("DiasAnticipacion"),
-                                        rs.getString("Descripcion")
-                                    );
-
-                                lista.add(p);
-                            }
-                rs.close();
-                stm.close();
+            Producto p =new Producto(
+            rs.getInt("IdProducto"),
+            rs.getString("NombreProducto"),
+            rs.getString("Categoria"),
+            rs.getDouble("Precio"),
+            rs.getInt("Stock"),
+            rs.getInt("DiasAnticipacion"),
+            rs.getString("Descripcion")
+            );
+            lista.add(p);
+            }
+            rs.close();
+            stm.close();
             }
             catch(Exception e)
             {
@@ -407,31 +404,42 @@ public class Conecta {
         return lista;
     }    
 
-    public boolean eliminarProductoCarrito(
-            int idDetalleCarrito)
+    public void eliminarProductoCarrito(int idDetalleCarrito)
     {
-        try
-        {
-            String sql = "DELETE FROM detallecarrito WHERE IdDetalleCarrito = ?";
+    try
+    {
+        con.setAutoCommit(false);
+        PreparedStatement ps = con.prepareStatement(
 
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1,idDetalleCarrito);
-            ps.executeUpdate();
-            
-            return true;
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
+                "DELETE FROM detallecarrito " +
+                "WHERE IdDetalleCarrito = ?"
+                );
+        ps.setInt(1,idDetalleCarrito);
+        ps.executeUpdate();
+        con.commit();
+        System.out.println("Transaccion exitosa");
     }
+    catch(Exception e)
+    {
+        if(con != null)
+        {
+            try
+            {
+                con.rollback();
+            }
+            catch(SQLException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Se cancelo la operacion");
+        e.printStackTrace();
+    }
+}
 
     public int obtenerOCrearCarrito(int idUsuario)
     {
         int idCarrito = -1;
-
         try
         {
             String sql =
@@ -453,10 +461,7 @@ public class Conecta {
                 "INSERT INTO carrito(IdUsuario) " +
                 "VALUES(?)";
 
-                ps = con.prepareStatement(
-                        sql,
-                        Statement.RETURN_GENERATED_KEYS);
-
+                ps = con.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1,idUsuario);
                 ps.executeUpdate();
                 ResultSet keys = ps.getGeneratedKeys();
@@ -474,65 +479,74 @@ public class Conecta {
         return idCarrito;
     }
 
-    public boolean agregarProductoCarrito(int idUsuario,int idProducto,int cantidad)
+//* Agregar producto al carrito
+
+    public void agregarProductoCarrito(int idUsuario, int idProducto, int cantidad)
     {
-        try
-        {
-            int idCarrito = obtenerOCrearCarrito(idUsuario);
-            String sql =
-            "SELECT * " +
-            "FROM detallecarrito " +
-            "WHERE IdCarrito = ? " +
-            "AND IdProducto = ?";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1,idCarrito);
-            ps.setInt(2,idProducto);
-            ResultSet rs = ps.executeQuery();
-
-            if(rs.next())
-            {
-                sql =
-                "UPDATE detallecarrito " +
-                "SET Cantidad = Cantidad + ? " +
+    try
+    {
+        con.setAutoCommit(false);
+        int idCarrito = obtenerOCrearCarrito(idUsuario);
+        String sql =
+                "SELECT * " +
+                "FROM detallecarrito " +
                 "WHERE IdCarrito = ? " +
                 "AND IdProducto = ?";
 
-                ps = con.prepareStatement(sql);
+        PreparedStatement ps =con.prepareStatement(sql);
 
-                ps.setInt(1,cantidad);
-                ps.setInt(2,idCarrito);
-                ps.setInt(3,idProducto);
-
-                ps.executeUpdate();
-            }
-            else
-            {
-                sql =
-                "INSERT INTO detallecarrito(" +
-                "IdCarrito," +
-                "IdProducto," +
-                "Cantidad) " +
-                "VALUES(?,?,?)";
-
-                ps = con.prepareStatement(sql);
-
-                ps.setInt(1,idCarrito);
-                ps.setInt(2,idProducto);
-                ps.setInt(3,cantidad);
-
-                ps.executeUpdate();
-            }
-
-            return true;
-        }
-        catch(Exception e)
+        ps.setInt(1,idCarrito);
+        ps.setInt(2,idProducto);
+        ResultSet rs =ps.executeQuery();
+        if(rs.next())
         {
-            e.printStackTrace();
-        }
+            sql =
+            "UPDATE detallecarrito " +
+            "SET Cantidad = Cantidad + ? " +
+            "WHERE IdCarrito = ? " +
+            "AND IdProducto = ?";
 
-        return false;
+            ps = con.prepareStatement(sql);
+            ps.setInt(1,cantidad);
+            ps.setInt(2,idCarrito);
+            ps.setInt(3,idProducto);
+            ps.executeUpdate();
+        }
+        else
+        {
+            sql =
+            "INSERT INTO detallecarrito(" +
+            "IdCarrito," +
+            "IdProducto," +
+            "Cantidad) " +
+            "VALUES(?,?,?)";
+
+            ps = con.prepareStatement(sql);
+            ps.setInt(1,idCarrito);
+            ps.setInt(2,idProducto);
+            ps.setInt(3,cantidad);
+            ps.executeUpdate();
+        }
+        con.commit();
+        System.out.println("Transaccion exitosa");
     }
+    catch(Exception e)
+    {
+        if(con != null)
+        {
+            try
+            {
+                con.rollback();
+            }
+            catch(SQLException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Se cancelo la operacion");
+        e.printStackTrace();
+    }
+}
 
     public boolean iniciarSesion(String usuarioCorreo,String contrasena)
     {

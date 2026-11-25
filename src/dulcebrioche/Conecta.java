@@ -932,7 +932,7 @@ public class Conecta {
 
             return filasEliminadas > 0;
         } catch (SQLException sqle) {
-            System.out.println("Error al eliminar cuenta: " + sqle.getMessage());
+            System.err.println("Error al eliminar cuenta: " + sqle.getMessage());
             sqle.printStackTrace();
         }
         return false;
@@ -1216,7 +1216,7 @@ public class Conecta {
                     System.err.println("Error al revertir la transaccion: " + ex.getMessage());
                 }
             }
-            e.printStackTrace();
+            System.err.println("Error al actualizar el producto: " + e.getMessage());
             System.out.println("Se cancelo la operacion");
         }
     }

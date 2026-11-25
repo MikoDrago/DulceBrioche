@@ -1,15 +1,15 @@
 package dulcebrioche;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1099,61 +1099,78 @@ public int insertarPersona(Persona obj)
         }
     }
 
-    public boolean actualizarProducto(Producto p,byte[] imagenNueva)
+    public void actualizarProducto(Producto p, byte[] imagenNueva)
     {
         try
         {
+            con.setAutoCommit(false);
+
             PreparedStatement ps = con.prepareStatement(
-                    "UPDATE productos " +
-                    "SET NombreProducto = ?, " +
-                    "Categoria = ?, " +
-                    "Precio = ?, " +
-                    "Stock = ?, " +
-                    "DiasAnticipacion = ?, " +
-                    "Descripcion = ? " +
-                    "WHERE IdProducto = ?"
-                    );
-            ps.setString(1,p.getNombreProducto());
-            ps.setString(2,p.getCategoria());
-            ps.setDouble(3,p.getPrecio());
-            ps.setInt(4,p.getStock());
-            ps.setInt(5,p.getDiasAnticipacion());
-            ps.setString(6,p.getDescripcion());
-            ps.setInt(7,p.getIdProducto());
+                "UPDATE productos " +
+                "SET NombreProducto = ?, " +
+                "Categoria = ?, " +
+                "Precio = ?, " +
+                "Stock = ?, " +
+                "DiasAnticipacion = ?, " +
+                "Descripcion = ? " +
+                "WHERE IdProducto = ?"
+            );
+
+            ps.setString(1, p.getNombreProducto());
+            ps.setString(2, p.getCategoria());
+            ps.setDouble(3, p.getPrecio());
+            ps.setInt(4, p.getStock());
+            ps.setInt(5, p.getDiasAnticipacion());
+            ps.setString(6, p.getDescripcion());
+            ps.setInt(7, p.getIdProducto());
             ps.executeUpdate();
+
             // Actualizar imagen si seleccionaron una
             if(imagenNueva != null)
             {
-                ps =con.prepareStatement(
-                "UPDATE imagenesproducto " +
-                "SET Imagen = ? " +
-                "WHERE IdProducto = ?"
+                ps = con.prepareStatement(
+                    "UPDATE imagenesproducto " +
+                    "SET Imagen = ? " +
+                    "WHERE IdProducto = ?"
                 );
-                ps.setBytes(1,imagenNueva);
-                ps.setInt(2,p.getIdProducto());
-                int filas =ps.executeUpdate();
+
+                ps.setBytes(1, imagenNueva);
+                ps.setInt(2, p.getIdProducto());
+                int filas = ps.executeUpdate();
 
                 // Si no había imagen previamente
-
                 if(filas == 0)
                 {
-                    ps =con.prepareStatement(
-                    "INSERT INTO imagenesproducto(" +
-                    "IdProducto,Imagen" +
-                    ") VALUES(?,?)"
+                    ps = con.prepareStatement(
+                        "INSERT INTO imagenesproducto(" +
+                        "IdProducto, Imagen" +
+                        ") VALUES(?,?)"
                     );
-                    ps.setInt(1,p.getIdProducto());
-                    ps.setBytes(2,imagenNueva);
+                    ps.setInt(1, p.getIdProducto());
+                    ps.setBytes(2, imagenNueva);
                     ps.executeUpdate();
                 }
             }
-            return true;
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
-        catch(SQLException e)
+        catch(Exception e)
         {
-            throw new RuntimeException("Error al actualizar el producto.",e);
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            System.out.println("Se cancelo la operacion");
         }
-       //return false;
     }
 
 }

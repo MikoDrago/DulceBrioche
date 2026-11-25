@@ -691,6 +691,7 @@ public class Conecta {
         }
         return 0;
     }
+    
     public List<ItemCarrito> obtenerDetallePedido(
             int idPedido)
     {
@@ -794,6 +795,7 @@ public class Conecta {
         }
         catch(Exception e)
         {
+            System.out.println("Error al obtener detalle del pedido: " + e.getMessage());
             e.printStackTrace();
         }
         return lista;
@@ -832,36 +834,52 @@ public class Conecta {
                     });
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
+            
+            System.out.println("Error al obtener todos los pedidos: " + e.getMessage());
             e.printStackTrace();
         }
         return lista;
     }
 
-    public void actualizarEstadoPedido(int idPedido,int idEstado)
+    public void actualizarEstadoPedido(int idPedido, int idEstado)
     {
         try
         {
+            con.setAutoCommit(false);
             String sql =
             "UPDATE pedidos " +
             "SET IdEstado = ? " +
             "WHERE IdPedido = ?";
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1,idEstado);
-            ps.setInt(2,idPedido);
+            ps.setInt(1, idEstado);
+            ps.setInt(2, idPedido);
             ps.executeUpdate();
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
     public ArrayList<String[]> obtenerPedidosPerfil(int idUsuario)
     {
-        ArrayList<String[]> lista =
-                new ArrayList<>();
+        ArrayList<String[]> lista =new ArrayList<>();
         try
         {
             String sql =
@@ -898,25 +916,43 @@ public class Conecta {
                     });
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al obtener pedidos: " + e.getMessage());
         }
         return lista;
     }
     
-    public void eliminarProducto(Producto obj) {
+    public void eliminarProducto(Producto obj)
+    {
         System.out.println("Eliminando producto: " + obj.getNombreProducto());
-        try {
+        try
+        {
+            con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement("DELETE FROM productos WHERE NombreProducto = ?");
             ps.setString(1, obj.getNombreProducto());
 
             int filasEliminadas = ps.executeUpdate();
             System.out.println("Numero de registros eliminados: " + filasEliminadas);
             ps.close();
-        } catch (SQLException sqle) {
-            System.out.println("Error al eliminar producto: " + sqle.getMessage());
-            sqle.printStackTrace();
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
+        }
+        catch(SQLException e)
+        {
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
@@ -938,11 +974,12 @@ public class Conecta {
         return false;
     }
 
-    public boolean actualizarCuenta(Persona p,String correo,String contrasena)
+    public void actualizarCuenta(Persona p, String correo, String contrasena)
     {
         try
         {
-            PreparedStatement ps =con.prepareStatement(
+            con.setAutoCommit(false);
+            PreparedStatement ps = con.prepareStatement(
                     "UPDATE personas " +
                     "SET Nombre = ?, " +
                     "ApellidoPaterno = ?, " +
@@ -958,22 +995,21 @@ public class Conecta {
                     "WHERE IdPersona = ?"
                     );
 
-            ps.setString(1,p.getNombre());
-            ps.setString(2,p.getApellidoPaterno());
-            ps.setString(3,p.getApellidoMaterno());
-            ps.setString(4,p.getTelefono());
-            ps.setString(5,p.getCalle());
-            ps.setString(6,p.getNumeroExterior());
-            ps.setString(7,p.getNumeroInterior());
-            ps.setString(8,p.getColonia());
-            ps.setString(9,p.getCiudad());
-            ps.setString(10,p.getEstado());
-            ps.setString(11,p.getCodigoPostal());
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidoPaterno());
+            ps.setString(3, p.getApellidoMaterno());
+            ps.setString(4, p.getTelefono());
+            ps.setString(5, p.getCalle());
+            ps.setString(6, p.getNumeroExterior());
+            ps.setString(7, p.getNumeroInterior());
+            ps.setString(8, p.getColonia());
+            ps.setString(9, p.getCiudad());
+            ps.setString(10, p.getEstado());
+            ps.setString(11, p.getCodigoPostal());
             ps.setInt(12, Sesion.idPersona);
             ps.executeUpdate();
 
-            if(contrasena != null &&
-            !contrasena.trim().isEmpty())
+            if(contrasena != null && !contrasena.trim().isEmpty())
             {
                 ps = con.prepareStatement(
                 "UPDATE usuarios " +
@@ -982,9 +1018,9 @@ public class Conecta {
                 "WHERE IdUsuario = ?"
                 );
 
-                ps.setString(1,correo);
-                ps.setString(2,contrasena);
-                ps.setInt(3,Sesion.idUsuario);
+                ps.setString(1, correo);
+                ps.setString(2, contrasena);
+                ps.setInt(3, Sesion.idUsuario);
             }
             else
             {
@@ -994,18 +1030,30 @@ public class Conecta {
                 "WHERE IdUsuario = ?"
                 );
 
-                ps.setString(1,correo);
-                ps.setInt(2,Sesion.idUsuario);
+                ps.setString(1, correo);
+                ps.setInt(2, Sesion.idUsuario);
             }
 
             ps.executeUpdate();
-            return true;
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
         catch(SQLException e)
         {
-            System.err.println("Error al actualizar la cuenta: " + e.getMessage());
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
-        return false;
     }
 
     public Persona LlenarDatosPersona()

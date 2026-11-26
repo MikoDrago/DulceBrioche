@@ -136,7 +136,6 @@ public class Conecta {
         try
         {
             con.setAutoCommit(false);
-
             PreparedStatement psPersona =con.prepareStatement(
                     "INSERT INTO personas(" +
                     "Nombre," +
@@ -176,9 +175,7 @@ public class Conecta {
                 idPersona = rs.getInt(1);
             }
 
-            PreparedStatement psUsuario =
-                    con.prepareStatement(
-
+            PreparedStatement psUsuario =con.prepareStatement(
                     "INSERT INTO usuarios(" +
                     "IdPersona," +
                     "IdRol," +
@@ -211,15 +208,12 @@ public class Conecta {
                 }
             }
 
-            System.out.println(
-                    "Se cancelo la operacion");
+            System.out.println("Se cancelo la operacion");
         }
     }
 
 //* Insert Producto
-    public void insertarProducto(
-            Producto obj,
-            List<byte[]> imagenes)
+    public void insertarProducto(Producto obj, List<byte[]> imagenes)
     {
         try
         {
@@ -240,15 +234,10 @@ public class Conecta {
             ps.setInt(4,obj.getStock());
             ps.setInt(5,obj.getDiasAnticipacion());
             ps.setString(6,obj.getDescripcion());
-
             ps.executeUpdate();
-
             Statement stm = con.createStatement();
-
             ResultSet rs = stm.executeQuery("SELECT LAST_INSERT_ID()");
-
             int idProducto = 0;
-
             if(rs.next())
             {
                 idProducto = rs.getInt(1);
@@ -410,7 +399,6 @@ public class Conecta {
     {
         con.setAutoCommit(false);
         PreparedStatement ps = con.prepareStatement(
-
                 "DELETE FROM detallecarrito " +
                 "WHERE IdDetalleCarrito = ?"
                 );
@@ -480,7 +468,6 @@ public class Conecta {
     }
 
 //* Agregar producto al carrito
-
     public void agregarProductoCarrito(int idUsuario, int idProducto, int cantidad)
     {
     try
@@ -492,9 +479,7 @@ public class Conecta {
                 "FROM detallecarrito " +
                 "WHERE IdCarrito = ? " +
                 "AND IdProducto = ?";
-
         PreparedStatement ps =con.prepareStatement(sql);
-
         ps.setInt(1,idCarrito);
         ps.setInt(2,idProducto);
         ResultSet rs =ps.executeQuery();
@@ -505,7 +490,6 @@ public class Conecta {
             "SET Cantidad = Cantidad + ? " +
             "WHERE IdCarrito = ? " +
             "AND IdProducto = ?";
-
             ps = con.prepareStatement(sql);
             ps.setInt(1,cantidad);
             ps.setInt(2,idCarrito);
@@ -613,98 +597,110 @@ public class Conecta {
         return total;
     }
 
-    public int generarPedido(int idUsuario)
+//* Insert Pedido 
+public int generarPedido(int idUsuario)
+{
+    int idPedido = 0;
+    try
     {
-        try
+        con.setAutoCommit(false);
+        int idCarrito = obtenerOCrearCarrito(idUsuario);
+
+        double total =obtenerTotalCarrito(idUsuario);
+
+        String sql =
+                "INSERT INTO pedidos(" +
+                "IdUsuario," +
+                "Total," +
+                "IdEstado) " +
+                "VALUES(?,?,?)";
+        PreparedStatement ps = con.prepareStatement(sql);
+
+        ps.setInt(1,idUsuario);
+        ps.setDouble(2,total);
+        ps.setInt(3,1);
+        ps.executeUpdate();
+        ResultSet rsPedido = con.createStatement()
+                   .executeQuery("SELECT LAST_INSERT_ID()");
+
+        if(rsPedido.next())
         {
-            int idCarrito =  obtenerOCrearCarrito(   idUsuario);
-            double total = obtenerTotalCarrito(   idUsuario);
-
-            String sql =
-            "INSERT INTO pedidos(" +
-            "IdUsuario," +
-            "Total," +
-            "IdEstado) " +
-            "VALUES(?,?,?)";
-
-            PreparedStatement ps = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS);
-
-            ps.setInt(1,idUsuario);
-            ps.setDouble(2,total);
-            ps.setInt(3,1); // Pendiente
-            ps.executeUpdate();
-            int idPedido = 0;
-            ResultSet keys =  ps.getGeneratedKeys();
-
-            if(keys.next())
-            {
-                idPedido =
-                        keys.getInt(1);
-            }
-
-            sql =
-            "SELECT dc.IdProducto, " +
-            "dc.Cantidad, " +
-            "p.Precio " +
-            "FROM detallecarrito dc " +
-            "INNER JOIN productos p " +
-            "ON dc.IdProducto = p.IdProducto " +
-            "WHERE dc.IdCarrito = ?";
-
-            ps = con.prepareStatement(sql);
-            ps.setInt(1,idCarrito);
-            ResultSet rs = ps.executeQuery();
-
-            while(rs.next())
-            {
-                int idProducto =
-                        rs.getInt("IdProducto");
-
-                int cantidad =
-                        rs.getInt("Cantidad");
-
-                double precio =
-                        rs.getDouble("Precio");
-
-                PreparedStatement detalle =
-                con.prepareStatement(
-                "INSERT INTO detallepedido(" +
-                "IdPedido," +
-                "IdProducto," +
-                "Cantidad," +
-                "PrecioUnitario) " +
-                "VALUES(?,?,?,?)");
-                detalle.setInt(1,idPedido);
-                detalle.setInt(2,idProducto);
-                detalle.setInt(3,cantidad);
-                detalle.setDouble(4,precio);
-                detalle.executeUpdate();
-                PreparedStatement stock =
-                con.prepareStatement(
-                "UPDATE productos " +
-                "SET Stock = Stock - ? " +
-                "WHERE IdProducto = ?");
-
-                stock.setInt(1,cantidad);
-                stock.setInt(2,idProducto);
-
-                stock.executeUpdate();
-            }
-            PreparedStatement limpiar =
-            con.prepareStatement(
-            "DELETE FROM detallecarrito " +
-            "WHERE IdCarrito = ?");
-            limpiar.setInt(1,idCarrito);
-            limpiar.executeUpdate();
-
-            return idPedido;
+            idPedido =rsPedido.getInt(1);
         }
-        catch(Exception e)
+        sql =
+                "SELECT dc.IdProducto, " +
+                "dc.Cantidad, " +
+                "p.Precio " +
+                "FROM detallecarrito dc " +
+                "INNER JOIN productos p " +
+                "ON dc.IdProducto = p.IdProducto " +
+                "WHERE dc.IdCarrito = ?";
+        ps = con.prepareStatement(sql);
+        ps.setInt(1,idCarrito);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next())
         {
-            e.printStackTrace();
+            int idProducto = rs.getInt("IdProducto");
+            int cantidad = rs.getInt("Cantidad");
+            double precio = rs.getDouble("Precio");
+
+            PreparedStatement detalle = con.prepareStatement(
+                    "INSERT INTO detallepedido(" +
+                    "IdPedido," +
+                    "IdProducto," +
+                    "Cantidad," +
+                    "PrecioUnitario) " +
+                    "VALUES(?,?,?,?)"
+                    );
+            detalle.setInt(1,idPedido);
+            detalle.setInt(2,idProducto);
+            detalle.setInt(3,cantidad);
+            detalle.setDouble(4,precio);
+            detalle.executeUpdate();
+            PreparedStatement stock =con.prepareStatement(
+                    "UPDATE productos " +
+                    "SET Stock = Stock - ? " +
+                    "WHERE IdProducto = ?"
+                    );
+            stock.setInt(1,cantidad);
+            stock.setInt(2,idProducto);
+            stock.executeUpdate();
         }
-        return 0;
+
+        PreparedStatement limpiar = con.prepareStatement(
+                "DELETE FROM detallecarrito " +
+                "WHERE IdCarrito = ?"
+                );
+        limpiar.setInt(
+                1,
+                idCarrito);
+        limpiar.executeUpdate();
+        con.commit();
+        System.out.println(
+                "Transaccion exitosa");
+        return idPedido;
     }
+    catch(Exception e)
+    {
+        if(con != null)
+        {
+            try
+            {
+                con.rollback();
+            }
+            catch(SQLException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+
+        System.out.println(
+                "Se cancelo la operacion");
+
+        e.printStackTrace();
+    }
+    return 0;
+}
     public List<ItemCarrito> obtenerDetallePedido(
             int idPedido)
     {
@@ -853,29 +849,43 @@ public class Conecta {
         return lista;
     }
 
-    public void actualizarEstadoPedido(int idPedido,int idEstado)
+public void actualizarEstadoPedido(int idPedido, int idEstado)
     {
         try
         {
+            con.setAutoCommit(false);
             String sql =
             "UPDATE pedidos " +
             "SET IdEstado = ? " +
             "WHERE IdPedido = ?";
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1,idEstado);
-            ps.setInt(2,idPedido);
+            ps.setInt(1, idEstado);
+            ps.setInt(2, idPedido);
             ps.executeUpdate();
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
     public ArrayList<String[]> obtenerPedidosPerfil(int idUsuario)
     {
-        ArrayList<String[]> lista =
-                new ArrayList<>();
+        ArrayList<String[]> lista =new ArrayList<>();
         try
         {
             String sql =
@@ -912,25 +922,41 @@ public class Conecta {
                     });
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al obtener pedidos: " + e.getMessage());
         }
         return lista;
     }
     
-    public void eliminarProducto(Producto obj) {
+    public void eliminarProducto(Producto obj)
+    {
         System.out.println("Eliminando producto: " + obj.getNombreProducto());
-        try {
+        try
+        {
+            con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement("DELETE FROM productos WHERE NombreProducto = ?");
             ps.setString(1, obj.getNombreProducto());
-
             int filasEliminadas = ps.executeUpdate();
             System.out.println("Numero de registros eliminados: " + filasEliminadas);
             ps.close();
-        } catch (SQLException sqle) {
-            System.out.println("Error al eliminar producto: " + sqle.getMessage());
-            sqle.printStackTrace();
+            con.commit();
+            System.out.println("Transaccion exitosa");
+        }
+        catch(SQLException e)
+        {
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
@@ -939,24 +965,23 @@ public class Conecta {
         try {
             PreparedStatement ps = con.prepareStatement("DELETE FROM personas WHERE IdPersona = ?");
             ps.setInt(1, idPersona);
-
             int filasEliminadas = ps.executeUpdate();
             System.out.println("Numero de registros eliminados: " + filasEliminadas);
             ps.close();
-
             return filasEliminadas > 0;
         } catch (SQLException sqle) {
-            System.out.println("Error al eliminar cuenta: " + sqle.getMessage());
+            System.err.println("Error al eliminar cuenta: " + sqle.getMessage());
             sqle.printStackTrace();
         }
         return false;
     }
 
-    public boolean actualizarCuenta(Persona p,String correo,String contrasena)
+    public void actualizarCuenta(Persona p, String correo, String contrasena)
     {
         try
         {
-            PreparedStatement ps =con.prepareStatement(
+            con.setAutoCommit(false);
+            PreparedStatement ps = con.prepareStatement(
                     "UPDATE personas " +
                     "SET Nombre = ?, " +
                     "ApellidoPaterno = ?, " +
@@ -972,22 +997,21 @@ public class Conecta {
                     "WHERE IdPersona = ?"
                     );
 
-            ps.setString(1,p.getNombre());
-            ps.setString(2,p.getApellidoPaterno());
-            ps.setString(3,p.getApellidoMaterno());
-            ps.setString(4,p.getTelefono());
-            ps.setString(5,p.getCalle());
-            ps.setString(6,p.getNumeroExterior());
-            ps.setString(7,p.getNumeroInterior());
-            ps.setString(8,p.getColonia());
-            ps.setString(9,p.getCiudad());
-            ps.setString(10,p.getEstado());
-            ps.setString(11,p.getCodigoPostal());
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidoPaterno());
+            ps.setString(3, p.getApellidoMaterno());
+            ps.setString(4, p.getTelefono());
+            ps.setString(5, p.getCalle());
+            ps.setString(6, p.getNumeroExterior());
+            ps.setString(7, p.getNumeroInterior());
+            ps.setString(8, p.getColonia());
+            ps.setString(9, p.getCiudad());
+            ps.setString(10, p.getEstado());
+            ps.setString(11, p.getCodigoPostal());
             ps.setInt(12, Sesion.idPersona);
             ps.executeUpdate();
 
-            if(contrasena != null &&
-            !contrasena.trim().isEmpty())
+            if(contrasena != null && !contrasena.trim().isEmpty())
             {
                 ps = con.prepareStatement(
                 "UPDATE usuarios " +
@@ -996,9 +1020,9 @@ public class Conecta {
                 "WHERE IdUsuario = ?"
                 );
 
-                ps.setString(1,correo);
-                ps.setString(2,contrasena);
-                ps.setInt(3,Sesion.idUsuario);
+                ps.setString(1, correo);
+                ps.setString(2, contrasena);
+                ps.setInt(3, Sesion.idUsuario);
             }
             else
             {
@@ -1008,18 +1032,30 @@ public class Conecta {
                 "WHERE IdUsuario = ?"
                 );
 
-                ps.setString(1,correo);
-                ps.setInt(2,Sesion.idUsuario);
+                ps.setString(1, correo);
+                ps.setInt(2, Sesion.idUsuario);
             }
 
             ps.executeUpdate();
-            return true;
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al intentar hacer rollback: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
-        return false;
     }
 
     public Persona LlenarDatosPersona()
@@ -1067,9 +1103,9 @@ public class Conecta {
                 p.setCodigoPostal(rs.getString("CodigoPostal"));
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al llenar los datos de la persona: " + e.getMessage());
         }
 
         return p;
@@ -1078,31 +1114,25 @@ public class Conecta {
     public String obtenerCorreo()
     {
         String correo = "";
-
         try
         {
             PreparedStatement ps = con.prepareStatement(
-
                     "SELECT CorreoElectronico " +
                     "FROM usuarios " +
                     "WHERE IdUsuario = ?"
-
                     );
 
             ps.setInt(1, Sesion.idUsuario);
-
             ResultSet rs =ps.executeQuery();
-
             if(rs.next())
             {
                 correo =rs.getString("CorreoElectronico");
             }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            e.printStackTrace();
+            System.err.println("Error al obtener el correo: " + e.getMessage());
         }
-
         return correo;
     }
 
@@ -1110,7 +1140,8 @@ public class Conecta {
     {
         try
         {
-            PreparedStatement ps =con.prepareStatement(
+            con.setAutoCommit(false);
+            PreparedStatement ps = con.prepareStatement(
                     "UPDATE personas " +
                     "SET Nombre = ?, " +
                     "ApellidoPaterno = ?, " +
@@ -1125,92 +1156,116 @@ public class Conecta {
                     "CodigoPostal = ? " +
                     "WHERE IdPersona = ?"
                     );
-            ps.setString(1,p.getNombre());
-            ps.setString(2,p.getApellidoPaterno());
-            ps.setString(3,p.getApellidoMaterno());
-            ps.setString(4,p.getTelefono());
-            ps.setString(5,p.getCalle());
-            ps.setString(6,p.getNumeroExterior());
-            ps.setString(7,p.getNumeroInterior());
-            ps.setString(8,p.getColonia());
-            ps.setString(9,p.getCiudad());
-            ps.setString(10,p.getEstado());
-            ps.setString(11,p.getCodigoPostal());
-            ps.setInt(12,Sesion.idPersona);
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidoPaterno());
+            ps.setString(3, p.getApellidoMaterno());
+            ps.setString(4, p.getTelefono());
+            ps.setString(5, p.getCalle());
+            ps.setString(6, p.getNumeroExterior());
+            ps.setString(7, p.getNumeroInterior());
+            ps.setString(8, p.getColonia());
+            ps.setString(9, p.getCiudad());
+            ps.setString(10, p.getEstado());
+            ps.setString(11, p.getCodigoPostal());
+            ps.setInt(12, Sesion.idPersona);
             ps.executeUpdate();
 
-            ps =con.prepareStatement(
+            ps = con.prepareStatement(
             "UPDATE usuarios " +
             "SET CorreoElectronico = ? " +
             "WHERE IdUsuario = ?"
             );
 
-            ps.setString(1,correo);
-            ps.setInt(2,Sesion.idUsuario);
+            ps.setString(1, correo);
+            ps.setInt(2, Sesion.idUsuario);
             ps.executeUpdate();
-            
+
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
         catch(SQLException e)
         {
-            e.printStackTrace();
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al revertir la transaccion: " + ex.getMessage());
+                }
+            }
+            System.out.println("Se cancelo la operacion");
         }
     }
 
-    public boolean actualizarProducto(Producto p,byte[] imagenNueva)
+    public void actualizarProducto(Producto p, byte[] imagenNueva)
     {
         try
         {
+            con.setAutoCommit(false);
             PreparedStatement ps = con.prepareStatement(
-                    "UPDATE productos " +
-                    "SET NombreProducto = ?, " +
-                    "Categoria = ?, " +
-                    "Precio = ?, " +
-                    "Stock = ?, " +
-                    "DiasAnticipacion = ?, " +
-                    "Descripcion = ? " +
-                    "WHERE IdProducto = ?"
-                    );
-            ps.setString(1,p.getNombreProducto());
-            ps.setString(2,p.getCategoria());
-            ps.setDouble(3,p.getPrecio());
-            ps.setInt(4,p.getStock());
-            ps.setInt(5,p.getDiasAnticipacion());
-            ps.setString(6,p.getDescripcion());
-            ps.setInt(7,p.getIdProducto());
+                "UPDATE productos " +
+                "SET NombreProducto = ?, " +
+                "Categoria = ?, " +
+                "Precio = ?, " +
+                "Stock = ?, " +
+                "DiasAnticipacion = ?, " +
+                "Descripcion = ? " +
+                "WHERE IdProducto = ?"
+            );
+
+            ps.setString(1, p.getNombreProducto());
+            ps.setString(2, p.getCategoria());
+            ps.setDouble(3, p.getPrecio());
+            ps.setInt(4, p.getStock());
+            ps.setInt(5, p.getDiasAnticipacion());
+            ps.setString(6, p.getDescripcion());
+            ps.setInt(7, p.getIdProducto());
             ps.executeUpdate();
+
             // Actualizar imagen si seleccionaron una
             if(imagenNueva != null)
             {
-                ps =con.prepareStatement(
-                "UPDATE imagenesproducto " +
-                "SET Imagen = ? " +
-                "WHERE IdProducto = ?"
+                ps = con.prepareStatement(
+                    "UPDATE imagenesproducto " +
+                    "SET Imagen = ? " +
+                    "WHERE IdProducto = ?"
                 );
-                ps.setBytes(1,imagenNueva);
-                ps.setInt(2,p.getIdProducto());
-                int filas =ps.executeUpdate();
-
-                // Si no había imagen previamente
-
+                ps.setBytes(1, imagenNueva);
+                ps.setInt(2, p.getIdProducto());
+                int filas = ps.executeUpdate();
                 if(filas == 0)
                 {
-                    ps =con.prepareStatement(
-                    "INSERT INTO imagenesproducto(" +
-                    "IdProducto,Imagen" +
-                    ") VALUES(?,?)"
+                    ps = con.prepareStatement(
+                        "INSERT INTO imagenesproducto(" +
+                        "IdProducto, Imagen" +
+                        ") VALUES(?,?)"
                     );
-                    ps.setInt(1,p.getIdProducto());
-                    ps.setBytes(2,imagenNueva);
+                    ps.setInt(1, p.getIdProducto());
+                    ps.setBytes(2, imagenNueva);
                     ps.executeUpdate();
                 }
             }
-            return true;
+            con.commit();
+            System.out.println("Transaccion exitosa");
         }
         catch(SQLException e)
         {
-            throw new RuntimeException("Error al actualizar el producto.",e);
+            if(con != null)
+            {
+                try
+                {
+                    con.rollback();
+                }
+                catch(SQLException ex)
+                {
+                    System.err.println("Error al revertir la transaccion: " + ex.getMessage());
+                }
+            }
+            System.err.println("Error al actualizar el producto: " + e.getMessage());
+            System.out.println("Se cancelo la operacion");
         }
-       //return false;
     }
-
 }
